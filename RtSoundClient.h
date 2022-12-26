@@ -4,7 +4,7 @@
 
 class RtSoundClient {
 public:
-  RtSoundClient() {}
+  RtSoundClient(int priority = 0) : _priority(priority) {}
   virtual ~RtSoundClient() {}
 
   inline void setPriority(int priority) { _priority = priority; }
@@ -17,5 +17,5 @@ protected:
   virtual void receiveStreamData(const RtStreamData &) {}
 
 private:
-  int _priority{0};
+  int _priority{};
 };

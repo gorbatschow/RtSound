@@ -23,6 +23,8 @@ void RtSoundIO::startAudioStream(bool shot) {
 
   _currSetup = _nextSetup;
   _currSetupPub = _currSetup;
+  _streamData.nInputChannels = _currSetup.inputStream().nChannels;
+  _streamData.nOutputChannels = _currSetup.outputStream().nChannels;
   _streamData.result = shot ? 1 : 0;
 
   const RtAudioErrorType rterr{_rta->openStream(
@@ -52,9 +54,8 @@ int RtSoundIO::onHandleStream(void *outputBuffer, void *inputBuffer,
   auto &streamData = *static_cast<RtStreamData *>(streamDataPtr);
   streamData.output = static_cast<float *>(outputBuffer);
   streamData.input = static_cast<float *>(inputBuffer);
-  streamData.nFrames = nFrames;
-  streamData.info.streamTime = streamTime;
-  streamData.info.streamStatus = streamStatus;
+  streamData.nFrames = int(nFrames);
+  streamData.streamTime = streamTime;
 
   const auto beginTime{std::chrono::high_resolution_clock::now()};
   streamData.soundIO->notifyReceiveStreamData(streamData);

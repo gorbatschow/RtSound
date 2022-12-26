@@ -4,18 +4,20 @@
 class RtSoundIO;
 
 struct RtStreamInfo {
-  RtAudioStreamStatus streamStatus{0x0};
-  double streamTime{0.};
-  long processingTime{0};
+  RtAudioStreamStatus streamStatus{};
+  double streamTime{};
+  long processingTime{};
 };
 
 struct RtStreamData {
   RtSoundIO *soundIO{nullptr};
   float *input{nullptr};
   float *output{nullptr};
-  unsigned int nFrames;
-  int result{0};
-  RtStreamInfo info;
+  int nFrames{};
+  int nInputChannels{};
+  int nOutputChannels{};
+  double streamTime{};
+  int result{};
   mutable std::mutex mutex;
 
   inline float *inputBuffer(int channel) const {
