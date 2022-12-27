@@ -3,6 +3,8 @@
 #include "RtSoundStream.h"
 
 class RtSoundClient {
+  friend class RtSoundProvider;
+
 public:
   RtSoundClient(int priority = 0) : _priority(priority) {}
   virtual ~RtSoundClient() {}
@@ -11,9 +13,8 @@ public:
   inline int priority() const { return _priority; };
 
 protected:
-  friend class RtSoundProvider;
   virtual void configureStream(RtSoundSetup &) {}
-  virtual void beforeStartStream(const RtSoundSetup &) {}
+  virtual void applyStreamConfig(const RtSoundSetup &) {}
   virtual void receiveStreamData(const RtStreamData &) {}
 
 private:

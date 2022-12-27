@@ -13,9 +13,10 @@ class RtSoundIO : public RtSoundProvider {
 public:
   RtSoundIO();
 
-  void startAudioEngine(RtAudio::Api api = RtAudio::UNSPECIFIED);
-  void startAudioStream(bool shot = false);
-  void stopAudioStream();
+  void startSoundEngine(RtAudio::Api api = RtAudio::UNSPECIFIED);
+  void startSoundStream(bool shot = false);
+  void stopSoundStream();
+  void applySoundSetup();
 
   inline const RtSoundSetup &currSoundSetup() const { return _currSetupPub; }
   inline RtSoundSetup &nextSoundSetup() { return _nextSetup; }

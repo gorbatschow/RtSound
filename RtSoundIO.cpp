@@ -6,7 +6,7 @@
 
 RtSoundIO::RtSoundIO() {}
 
-void RtSoundIO::startAudioEngine(RtAudio::Api api) {
+void RtSoundIO::startSoundEngine(RtAudio::Api api) {
   if (_rta) {
     _rta->stopStream();
   }
@@ -14,10 +14,12 @@ void RtSoundIO::startAudioEngine(RtAudio::Api api) {
   _nextSetup.inputStream().deviceId = _rta->getDefaultInputDevice();
   _nextSetup.outputStream().deviceId = _rta->getDefaultOutputDevice();
   _currSetup = _nextSetup;
+
+  notifyApplyStreamConfig(_currSetup);
 }
 
-void RtSoundIO::startAudioStream(bool shot) {
-  stopAudioStream();
+void RtSoundIO::startSoundStream(bool shot) {
+  stopSoundStream();
   orderClients();
   notifyConfigureStream(_nextSetup);
 
@@ -33,18 +35,20 @@ void RtSoundIO::startAudioStream(bool shot) {
       &RtSoundIO::onHandleStream, &_streamData, &_currSetup.streamOpts())};
 
   if (rterr == RTAUDIO_NO_ERROR) {
-    notifyBeforeStartStream(_currSetup);
+    notifyApplyStreamConfig(_currSetup);
     _rta->startStream();
   }
 }
 
-void RtSoundIO::stopAudioStream() {
+void RtSoundIO::stopSoundStream() {
   if (_rta->isStreamRunning())
     _rta->stopStream();
 
   if (_rta->isStreamOpen())
     _rta->closeStream();
 }
+
+void RtSoundIO::applySoundSetup() { notifyApplyStreamConfig(_nextSetup); }
 
 int RtSoundIO::onHandleStream(void *outputBuffer, void *inputBuffer,
                               unsigned int nFrames, double streamTime,

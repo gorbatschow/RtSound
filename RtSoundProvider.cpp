@@ -5,6 +5,9 @@
 RtSoundProvider::RtSoundProvider() {}
 
 void RtSoundProvider::addClient(std::weak_ptr<RtSoundClient> client) {
+  if (client.expired()) {
+    return;
+  }
   _clients.push_back(client);
 }
 
@@ -30,10 +33,10 @@ void RtSoundProvider::notifyConfigureStream(RtSoundSetup &setup) {
   }
 }
 
-void RtSoundProvider::notifyBeforeStartStream(const RtSoundSetup &setup) {
+void RtSoundProvider::notifyApplyStreamConfig(const RtSoundSetup &setup) {
   checkClients();
   for (auto &client : _clients) {
-    client.lock().get()->beforeStartStream(setup);
+    client.lock().get()->applyStreamConfig(setup);
   }
 }
 

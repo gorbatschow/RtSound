@@ -17,7 +17,7 @@ protected:
   void checkClients();
   void orderClients();
   void notifyConfigureStream(RtSoundSetup &setup);
-  void notifyBeforeStartStream(const RtSoundSetup &setup);
+  void notifyApplyStreamConfig(const RtSoundSetup &setup);
   void notifyReceiveStreamData(const RtStreamData &data);
 
 private:
