@@ -13,6 +13,7 @@ public:
   inline int priority() const { return _priority; };
 
 protected:
+  virtual void updateSoundDevices(const std::vector<RtAudio::DeviceInfo> &) {}
   virtual void configureStream(RtSoundSetup &) {}
   virtual void applyStreamConfig(const RtSoundSetup &) {}
   virtual void receiveStreamData(const RtStreamData &) {}

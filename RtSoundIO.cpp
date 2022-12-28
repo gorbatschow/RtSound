@@ -7,14 +7,14 @@
 RtSoundIO::RtSoundIO() {}
 
 void RtSoundIO::startSoundEngine(RtAudio::Api api) {
-  if (_rta) {
-    _rta->stopStream();
-  }
+  stopSoundStream();
+
   _rta = std::make_unique<RtAudio>(api);
   _nextSetup.inputStream().deviceId = _rta->getDefaultInputDevice();
   _nextSetup.outputStream().deviceId = _rta->getDefaultOutputDevice();
   _currSetup = _nextSetup;
 
+  notifyUpdateSoundDevices(listSoundDevices());
   notifyApplyStreamConfig(_currSetup);
 }
 
@@ -41,6 +41,9 @@ void RtSoundIO::startSoundStream(bool shot) {
 }
 
 void RtSoundIO::stopSoundStream() {
+  if (!_rta)
+    return;
+
   if (_rta->isStreamRunning())
     _rta->stopStream();
 
@@ -49,6 +52,16 @@ void RtSoundIO::stopSoundStream() {
 }
 
 void RtSoundIO::applySoundSetup() { notifyApplyStreamConfig(_nextSetup); }
+
+std::vector<RtAudio::DeviceInfo> RtSoundIO::listSoundDevices() const {
+  std::vector<RtAudio::DeviceInfo> devices;
+  const auto ids{_rta->getDeviceIds()};
+  devices.reserve(ids.size());
+  for (auto &id : ids) {
+    devices.push_back(_rta->getDeviceInfo(id));
+  }
+  return devices;
+}
 
 int RtSoundIO::onHandleStream(void *outputBuffer, void *inputBuffer,
                               unsigned int nFrames, double streamTime,

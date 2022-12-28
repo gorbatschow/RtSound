@@ -26,23 +26,31 @@ void RtSoundProvider::orderClients() {
             });
 }
 
+void RtSoundProvider::notifyUpdateSoundDevices(
+    const std::vector<RtAudio::DeviceInfo> &devices) {
+  checkClients();
+  for (auto &client : _clients) {
+    client.lock()->updateSoundDevices(devices);
+  }
+}
+
 void RtSoundProvider::notifyConfigureStream(RtSoundSetup &setup) {
   checkClients();
   for (auto &client : _clients) {
-    client.lock().get()->configureStream(setup);
+    client.lock()->configureStream(setup);
   }
 }
 
 void RtSoundProvider::notifyApplyStreamConfig(const RtSoundSetup &setup) {
   checkClients();
   for (auto &client : _clients) {
-    client.lock().get()->applyStreamConfig(setup);
+    client.lock()->applyStreamConfig(setup);
   }
 }
 
 void RtSoundProvider::notifyReceiveStreamData(const RtStreamData &data) {
   checkClients();
   for (auto &client : _clients) {
-    client.lock().get()->receiveStreamData(data);
+    client.lock()->receiveStreamData(data);
   }
 }

@@ -16,9 +16,10 @@ public:
 protected:
   void checkClients();
   void orderClients();
-  void notifyConfigureStream(RtSoundSetup &setup);
-  void notifyApplyStreamConfig(const RtSoundSetup &setup);
-  void notifyReceiveStreamData(const RtStreamData &data);
+  void notifyUpdateSoundDevices(const std::vector<RtAudio::DeviceInfo> &);
+  void notifyConfigureStream(RtSoundSetup &);
+  void notifyApplyStreamConfig(const RtSoundSetup &);
+  void notifyReceiveStreamData(const RtStreamData &);
 
 private:
   std::vector<std::weak_ptr<RtSoundClient>> _clients;

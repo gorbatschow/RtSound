@@ -7,7 +7,6 @@
 #include <atomic>
 #include <memory>
 #include <vector>
-class RtSoundClient;
 
 class RtSoundIO : public RtSoundProvider {
 public:
@@ -28,6 +27,8 @@ public:
   }
   inline RtStreamInfo streamInfo() const { return _streamInfo.load(); }
 
+  std::vector<RtAudio::DeviceInfo> listSoundDevices() const;
+
 private:
   std::unique_ptr<RtAudio> _rta;
   RtSoundSetup _currSetup, _currSetupPub, _nextSetup;
@@ -38,3 +39,14 @@ private:
                             unsigned int nFrames, double streamTime,
                             RtAudioStreamStatus status, void *streamDataPtr);
 };
+
+// -----------------------------------------------------------------------------
+inline bool operator==(const RtAudio::DeviceInfo &devl,
+                       const RtAudio::DeviceInfo &devr) {
+  return devl.ID == devr.ID;
+}
+
+inline bool operator!=(const RtAudio::DeviceInfo &devl,
+                       const RtAudio::DeviceInfo &devr) {
+  return devl.ID != devr.ID;
+}
