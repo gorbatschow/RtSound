@@ -48,7 +48,7 @@ void RtSoundProvider::notifyApplyStreamConfig(const RtSoundSetup &setup) {
   }
 }
 
-void RtSoundProvider::notifyReceiveStreamData(const RtStreamData &data) {
+void RtSoundProvider::notifyReceiveStreamData(const RtSoundData &data) {
   checkClients();
   for (auto &client : _clients) {
     client.lock()->receiveStreamData(data);

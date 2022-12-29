@@ -1,6 +1,6 @@
 #pragma once
+#include "RtSoundData.h"
 #include "RtSoundSetup.h"
-#include "RtSoundStream.h"
 #include <memory>
 #include <mutex>
 #include <vector>
@@ -19,7 +19,7 @@ protected:
   void notifyUpdateSoundDevices(const std::vector<RtAudio::DeviceInfo> &);
   void notifyConfigureStream(RtSoundSetup &);
   void notifyApplyStreamConfig(const RtSoundSetup &);
-  void notifyReceiveStreamData(const RtStreamData &);
+  void notifyReceiveStreamData(const RtSoundData &);
 
 private:
   std::vector<std::weak_ptr<RtSoundClient>> _clients;

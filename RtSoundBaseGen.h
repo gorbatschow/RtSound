@@ -28,8 +28,8 @@ private:
   std::atomic_int _outputChannel{};
   std::atomic_bool _outputEnabled{false};
 
-  virtual void receiveStreamData(const RtStreamData &streamData) override final;
+  virtual void receiveStreamData(const RtSoundData &streamData) override final;
 
-  void fillInput(const RtStreamData &streamData) const;
-  void fillOutput(const RtStreamData &streamData) const;
+  void fillInput(const RtSoundData &streamData) const;
+  void fillOutput(const RtSoundData &streamData) const;
 };

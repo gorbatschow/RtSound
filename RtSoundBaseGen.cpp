@@ -3,7 +3,7 @@
 
 RtSoundBaseGen::RtSoundBaseGen(int priority) : RtSoundClient(priority) {}
 
-void RtSoundBaseGen::receiveStreamData(const RtStreamData &streamData) {
+void RtSoundBaseGen::receiveStreamData(const RtSoundData &streamData) {
   if (_inputEnabled) {
     std::lock_guard(streamData.mutex);
     fillInput(streamData);
@@ -15,7 +15,7 @@ void RtSoundBaseGen::receiveStreamData(const RtStreamData &streamData) {
   }
 }
 
-void RtSoundBaseGen::fillInput(const RtStreamData &streamData) const {
+void RtSoundBaseGen::fillInput(const RtSoundData &streamData) const {
   if (_inputChannel >= 0) {
     generate(streamData.inputBuffer(_inputChannel), streamData.framesN(),
              streamData.streamTime());
@@ -29,7 +29,7 @@ void RtSoundBaseGen::fillInput(const RtStreamData &streamData) const {
   }
 }
 
-void RtSoundBaseGen::fillOutput(const RtStreamData &streamData) const {
+void RtSoundBaseGen::fillOutput(const RtSoundData &streamData) const {
   if (_outputChannel >= 0) {
     generate(streamData.outputBuffer(_outputChannel), streamData.framesN(),
              streamData.streamTime());

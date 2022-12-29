@@ -1,7 +1,7 @@
 #pragma once
+#include "RtSoundInfo.h"
 #include "RtSoundProvider.h"
 #include "RtSoundSetup.h"
-#include "RtSoundStream.h"
 #include <RtAudio.h>
 #include <algorithm>
 #include <atomic>
@@ -25,15 +25,15 @@ public:
   inline RtAudio::DeviceInfo currOutputDevice() const {
     return _rta->getDeviceInfo(_currSetupPub.outputStream().deviceId);
   }
-  inline RtStreamInfo streamInfo() const { return _streamInfo.load(); }
+  inline const RtSoundInfo &soundInfo() const { return _streamInfo; }
 
   std::vector<RtAudio::DeviceInfo> listSoundDevices() const;
 
 private:
-  std::unique_ptr<RtAudio> _rta;
+  std::shared_ptr<RtAudio> _rta;
   RtSoundSetup _currSetup, _currSetupPub, _nextSetup;
-  RtStreamData _streamData{this};
-  std::atomic<RtStreamInfo> _streamInfo;
+  RtSoundData _streamData{this};
+  RtSoundInfo _streamInfo{_rta};
 
   static int onHandleStream(void *outputBuffer, void *inputBuffer,
                             unsigned int nFrames, double streamTime,

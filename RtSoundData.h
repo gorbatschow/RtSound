@@ -1,15 +1,10 @@
 #pragma once
 #include <RtAudio.h>
+#include <cstring>
 #include <mutex>
 class RtSoundIO;
 
-struct RtStreamInfo {
-  RtAudioStreamStatus streamStatus{};
-  double streamTime{};
-  long processingTime{};
-};
-
-class RtStreamData {
+class RtSoundData {
 public:
   inline float *inputBuffer(int channel) const {
     if (channel >= _nInputs) {
@@ -24,6 +19,16 @@ public:
     return _output + _nFrames * channel;
   }
 
+  inline void copyInputBuffer(int channel, float *dst) const {
+    std::lock_guard lock(mutex);
+    memcpy(dst, inputBuffer(channel), framesN() * sizeof(float));
+  }
+
+  inline void copyOutputBuffer(int channel, float *dst) const {
+    std::lock_guard lock(mutex);
+    memcpy(dst, outputBuffer(channel), framesN() * sizeof(float));
+  }
+
   inline int framesN() const { return _nFrames; }
   inline int inputChannelsN() const { return _nInputs; }
   inline int outputChannelsN() const { return _nOutputs; }
@@ -33,7 +38,7 @@ public:
 
 private:
   friend class RtSoundIO;
-  RtStreamData(RtSoundIO *soundIO) : _soundIO{soundIO} {}
+  RtSoundData(RtSoundIO *soundIO) : _soundIO{soundIO} {}
   inline RtSoundIO *soundIO() const { return _soundIO; };
   void setInput(float *input) { _input = input; }
   inline void setOutput(float *output) { _output = output; }

@@ -9,7 +9,8 @@ RtSoundIO::RtSoundIO() {}
 void RtSoundIO::startSoundEngine(RtAudio::Api api) {
   stopSoundStream();
 
-  _rta = std::make_unique<RtAudio>(api);
+  _rta = std::make_shared<RtAudio>(api);
+  _streamInfo._rta = _rta;
   _nextSetup.inputStream().deviceId = _rta->getDefaultInputDevice();
   _nextSetup.outputStream().deviceId = _rta->getDefaultOutputDevice();
   _currSetup = _nextSetup;
@@ -68,7 +69,7 @@ int RtSoundIO::onHandleStream(void *outputBuffer, void *inputBuffer,
                               RtAudioStreamStatus streamStatus,
                               void *streamDataPtr) {
 
-  auto &streamData = *static_cast<RtStreamData *>(streamDataPtr);
+  auto &streamData = *static_cast<RtSoundData *>(streamDataPtr);
   streamData.setOutput(static_cast<float *>(outputBuffer));
   streamData.setInput(static_cast<float *>(inputBuffer));
   streamData.setFramesN(int(nFrames));
@@ -80,8 +81,11 @@ int RtSoundIO::onHandleStream(void *outputBuffer, void *inputBuffer,
   const auto duration{std::chrono::duration_cast<std::chrono::microseconds>(
       endTime - beginTime)};
 
-  streamData.soundIO()->_streamInfo.exchange(
-      {streamStatus, streamTime, duration.count()});
+  streamData.soundIO()->_streamInfo.setStreamStatus(streamStatus);
+  streamData.soundIO()->_streamInfo.setStreamTime(streamTime);
+  streamData.soundIO()->_streamInfo.setProcessingTime(duration.count());
+  streamData.soundIO()->_streamInfo.setBufferTime(
+      nFrames, streamData.soundIO()->_currSetup.sampleRate());
 
   return streamData._result;
 }
