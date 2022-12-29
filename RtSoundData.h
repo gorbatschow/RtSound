@@ -20,12 +20,10 @@ public:
   }
 
   inline void copyInputBuffer(int channel, float *dst) const {
-    std::lock_guard lock(mutex);
     memcpy(dst, inputBuffer(channel), framesN() * sizeof(float));
   }
 
   inline void copyOutputBuffer(int channel, float *dst) const {
-    std::lock_guard lock(mutex);
     memcpy(dst, outputBuffer(channel), framesN() * sizeof(float));
   }
 
@@ -33,13 +31,14 @@ public:
   inline int inputChannelsN() const { return _nInputs; }
   inline int outputChannelsN() const { return _nOutputs; }
   inline double streamTime() const { return _streamTime; }
+  inline int result() const { return _result; }
 
   mutable std::mutex mutex;
 
 private:
   friend class RtSoundIO;
-  RtSoundData(RtSoundIO *soundIO) : _soundIO{soundIO} {}
-  inline RtSoundIO *soundIO() const { return _soundIO; };
+  friend class RtSoundProvider;
+  RtSoundData() {}
   void setInput(float *input) { _input = input; }
   inline void setOutput(float *output) { _output = output; }
   inline void setFramesN(int nFrames) { _nFrames = nFrames; }
@@ -49,7 +48,6 @@ private:
   inline void setResult(int result) { _result = result; }
 
 private:
-  RtSoundIO *_soundIO{nullptr};
   float *_input{nullptr};
   float *_output{nullptr};
   int _nFrames{};

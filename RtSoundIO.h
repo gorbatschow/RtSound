@@ -32,12 +32,11 @@ public:
 private:
   std::shared_ptr<RtAudio> _rta;
   RtSoundSetup _currSetup, _currSetupPub, _nextSetup;
-  RtSoundData _streamData{this};
   RtSoundInfo _streamInfo{_rta};
 
   static int onHandleStream(void *outputBuffer, void *inputBuffer,
                             unsigned int nFrames, double streamTime,
-                            RtAudioStreamStatus status, void *streamDataPtr);
+                            RtAudioStreamStatus status, void *ioPtr);
 };
 
 // -----------------------------------------------------------------------------

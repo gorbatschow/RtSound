@@ -1,6 +1,8 @@
 #pragma once
 #include "RtSoundData.h"
 #include "RtSoundSetup.h"
+#include <cassert>
+#include <memory>
 
 class RtSoundClient {
   friend class RtSoundProvider;
@@ -16,8 +18,16 @@ protected:
   virtual void updateSoundDevices(const std::vector<RtAudio::DeviceInfo> &) {}
   virtual void configureStream(RtSoundSetup &) {}
   virtual void applyStreamConfig(const RtSoundSetup &) {}
-  virtual void receiveStreamData(const RtSoundData &) {}
+  virtual void streamDataReady(){};
+
+  const RtSoundData &streamData() const {
+    const auto ptr{_streamData.lock().get()};
+    if (!ptr)
+      throw std::bad_weak_ptr();
+    return *ptr;
+  }
 
 private:
   int _priority{};
+  std::weak_ptr<RtSoundData> _streamData{};
 };

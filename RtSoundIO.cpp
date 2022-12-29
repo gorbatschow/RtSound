@@ -26,14 +26,14 @@ void RtSoundIO::startSoundStream(bool shot) {
 
   _currSetup = _nextSetup;
   _currSetupPub = _currSetup;
-  _streamData.setInputChannelsN(_currSetup.inputStream().nChannels);
-  _streamData.setOutputChannelsN(_currSetup.outputStream().nChannels);
-  _streamData.setResult(shot ? 1 : 0);
+  _streamData->setInputChannelsN(_currSetup.inputStream().nChannels);
+  _streamData->setOutputChannelsN(_currSetup.outputStream().nChannels);
+  _streamData->setResult(shot ? 1 : 0);
 
   const RtAudioErrorType rterr{_rta->openStream(
       _currSetup.outputStreamPtr(), _currSetup.inputStreamPtr(),
       RTAUDIO_FLOAT32, _currSetup.sampleRate(), _currSetup.bufferFramesPtr(),
-      &RtSoundIO::onHandleStream, &_streamData, &_currSetup.streamOpts())};
+      &RtSoundIO::onHandleStream, this, &_currSetup.streamOpts())};
 
   if (rterr == RTAUDIO_NO_ERROR) {
     notifyApplyStreamConfig(_currSetup);
@@ -66,26 +66,24 @@ std::vector<RtAudio::DeviceInfo> RtSoundIO::listSoundDevices() const {
 
 int RtSoundIO::onHandleStream(void *outputBuffer, void *inputBuffer,
                               unsigned int nFrames, double streamTime,
-                              RtAudioStreamStatus streamStatus,
-                              void *streamDataPtr) {
+                              RtAudioStreamStatus streamStatus, void *ioPtr) {
 
-  auto &streamData = *static_cast<RtSoundData *>(streamDataPtr);
-  streamData.setOutput(static_cast<float *>(outputBuffer));
-  streamData.setInput(static_cast<float *>(inputBuffer));
-  streamData.setFramesN(int(nFrames));
-  streamData.setStreamTime(streamTime);
+  auto &io = *static_cast<RtSoundIO *>(ioPtr);
+  io._streamData->setOutput(static_cast<float *>(outputBuffer));
+  io._streamData->setInput(static_cast<float *>(inputBuffer));
+  io._streamData->setFramesN(int(nFrames));
+  io._streamData->setStreamTime(streamTime);
 
   const auto beginTime{std::chrono::high_resolution_clock::now()};
-  streamData.soundIO()->notifyReceiveStreamData(streamData);
+  io.notifyStreamDataReady();
   const auto endTime{std::chrono::high_resolution_clock::now()};
   const auto duration{std::chrono::duration_cast<std::chrono::microseconds>(
       endTime - beginTime)};
 
-  streamData.soundIO()->_streamInfo.setStreamStatus(streamStatus);
-  streamData.soundIO()->_streamInfo.setStreamTime(streamTime);
-  streamData.soundIO()->_streamInfo.setProcessingTime(duration.count());
-  streamData.soundIO()->_streamInfo.setBufferTime(
-      nFrames, streamData.soundIO()->_currSetup.sampleRate());
+  io._streamInfo.setStreamStatus(streamStatus);
+  io._streamInfo.setStreamTime(streamTime);
+  io._streamInfo.setProcessingTime(duration.count());
+  io._streamInfo.setBufferTime(nFrames, io._currSetup.sampleRate());
 
-  return streamData._result;
+  return io._streamData->result();
 }

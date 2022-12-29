@@ -19,8 +19,8 @@ protected:
   void notifyUpdateSoundDevices(const std::vector<RtAudio::DeviceInfo> &);
   void notifyConfigureStream(RtSoundSetup &);
   void notifyApplyStreamConfig(const RtSoundSetup &);
-  void notifyReceiveStreamData(const RtSoundData &);
+  void notifyStreamDataReady();
 
-private:
   std::vector<std::weak_ptr<RtSoundClient>> _clients;
+  std::shared_ptr<RtSoundData> _streamData{new RtSoundData()};
 };
