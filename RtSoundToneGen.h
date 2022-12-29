@@ -17,11 +17,10 @@ protected:
   virtual void applyStreamConfig(const RtSoundSetup &setup) override final;
 
 private:
-  float _dt{};
-  float _df{};
+  float _dt{}, _df{}, _fs{}, _nwin{};
   float _da{1.0f / 100.0f};
-  std::atomic_int _amplitude{50};
-  std::atomic_int _frequency{50};
+  std::atomic_int _amplitude{25};
+  std::atomic_int _frequency{25};
 
   void generate(float *buffer, int nFrames, double t) const override;
 };
