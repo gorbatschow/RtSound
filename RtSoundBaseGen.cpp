@@ -17,28 +17,28 @@ void RtSoundBaseGen::receiveStreamData(const RtStreamData &streamData) {
 
 void RtSoundBaseGen::fillInput(const RtStreamData &streamData) const {
   if (_inputChannel >= 0) {
-    generate(streamData.inputBuffer(_inputChannel), streamData.nFrames,
-             streamData.streamTime);
+    generate(streamData.inputBuffer(_inputChannel), streamData.framesN(),
+             streamData.streamTime());
   } else {
-    generate(streamData.inputBuffer(0), streamData.nFrames,
-             streamData.streamTime);
-    for (int chan = 0; chan != streamData.nInputChannels; ++chan) {
+    generate(streamData.inputBuffer(0), streamData.framesN(),
+             streamData.streamTime());
+    for (int chan = 0; chan != streamData.inputChannelsN(); ++chan) {
       std::memcpy(streamData.inputBuffer(0), streamData.inputBuffer(chan),
-                  streamData.nFrames);
+                  streamData.framesN());
     }
   }
 }
 
 void RtSoundBaseGen::fillOutput(const RtStreamData &streamData) const {
   if (_outputChannel >= 0) {
-    generate(streamData.outputBuffer(_outputChannel), streamData.nFrames,
-             streamData.streamTime);
+    generate(streamData.outputBuffer(_outputChannel), streamData.framesN(),
+             streamData.streamTime());
   } else {
-    generate(streamData.outputBuffer(0), streamData.nFrames,
-             streamData.streamTime);
-    for (int chan = 0; chan != streamData.nOutputChannels; ++chan) {
+    generate(streamData.outputBuffer(0), streamData.framesN(),
+             streamData.streamTime());
+    for (int chan = 0; chan != streamData.outputChannelsN(); ++chan) {
       std::memcpy(streamData.outputBuffer(0), streamData.outputBuffer(chan),
-                  streamData.nFrames);
+                  streamData.framesN());
     }
   }
 }
