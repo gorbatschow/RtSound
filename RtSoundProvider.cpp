@@ -14,15 +14,15 @@ void RtSoundProvider::addClient(std::weak_ptr<RtSoundClient> client_) {
 }
 
 void RtSoundProvider::checkClients() {
-  std::remove_if(
-      _clients.begin(), _clients.end(),
-      [](const std::weak_ptr<RtSoundClient> &ptr) { return ptr.expired(); });
+  std::remove_if(_clients.begin(), _clients.end(),
+                 [](const auto &ptr) { return ptr.expired(); });
 }
 
 void RtSoundProvider::orderClients() {
-  std::sort(_clients.begin(), _clients.end(), [](auto &first, auto &second) {
-    return first.lock().get()->priority() < second.lock()->priority();
-  });
+  std::sort(_clients.begin(), _clients.end(),
+            [](const auto &first, const auto &second) {
+              return first.lock().get()->priority() < second.lock()->priority();
+            });
 }
 
 void RtSoundProvider::notifyUpdateSoundDevices() {
