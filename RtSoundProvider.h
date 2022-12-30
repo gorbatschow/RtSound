@@ -11,7 +11,7 @@ public:
   RtSoundProvider();
   ~RtSoundProvider() {}
 
-  void addClient(std::weak_ptr<RtSoundClient> client);
+  void addClient(std::weak_ptr<RtSoundClient> client_);
 
 protected:
   void checkClients();
@@ -22,5 +22,6 @@ protected:
   void notifyStreamDataReady();
 
   std::vector<std::weak_ptr<RtSoundClient>> _clients;
+  std::shared_ptr<RtSoundSetup> _streamSetup{new RtSoundSetup()};
   std::shared_ptr<RtSoundData> _streamData{new RtSoundData()};
 };

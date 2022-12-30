@@ -20,14 +20,30 @@ protected:
   virtual void applyStreamConfig(const RtSoundSetup &) {}
   virtual void streamDataReady(){};
 
+  const RtSoundSetup &streamSetup() const {
+    const auto ptr{_streamSetup.lock().get()};
+    assert(ptr != nullptr);
+    return *ptr;
+  }
+
   const RtSoundData &streamData() const {
     const auto ptr{_streamData.lock().get()};
-    if (!ptr)
-      throw std::bad_weak_ptr();
+    assert(ptr != nullptr);
     return *ptr;
   }
 
 private:
   int _priority{};
+  std::weak_ptr<RtSoundSetup> _streamSetup{};
   std::weak_ptr<RtSoundData> _streamData{};
+
+  inline void setStreamSetup(std::weak_ptr<RtSoundSetup> setup) {
+    assert(setup.lock() != nullptr);
+    _streamSetup.swap(setup);
+  }
+
+  inline void setStreamData(std::weak_ptr<RtSoundData> data) {
+    assert(data.lock() != nullptr);
+    _streamData.swap(data);
+  }
 };
