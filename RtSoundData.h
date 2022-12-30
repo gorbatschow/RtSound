@@ -1,5 +1,6 @@
 #pragma once
 #include <RtAudio.h>
+#include <cassert>
 #include <cstring>
 #include <mutex>
 class RtSoundIO;
@@ -7,15 +8,11 @@ class RtSoundIO;
 class RtSoundData {
 public:
   inline float *inputBuffer(int channel) const {
-    if (channel >= _nInputs) {
-      throw std::out_of_range("RtStreamData : INPUT channel is out of range");
-    }
+    assert(channel < _nInputs);
     return _input + _nFrames * channel;
   }
   inline float *outputBuffer(int channel) const {
-    if (channel >= _nOutputs) {
-      throw std::out_of_range("RtStreamData : OUTPUT channel is out of range");
-    }
+    assert(channel < _nOutputs);
     return _output + _nFrames * channel;
   }
 

@@ -5,9 +5,7 @@
 RtSoundProvider::RtSoundProvider() {}
 
 void RtSoundProvider::addClient(std::weak_ptr<RtSoundClient> client) {
-  if (client.expired()) {
-    return;
-  }
+  assert(!client.expired());
   client.lock()->_streamData = _streamData;
   _clients.push_back(client);
 }

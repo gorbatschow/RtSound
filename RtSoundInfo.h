@@ -20,30 +20,38 @@ public:
   inline long bufferTime() const { return _bufferTime.load(); }
 
   inline bool streamRunning() const {
-    if (_rta.expired())
+    const auto rta{_rta.lock().get()};
+    if (!rta)
       return false;
-    return _rta.lock()->isStreamRunning();
+    return rta->isStreamRunning();
   }
 
   inline bool streamOpen() const {
-    if (_rta.expired())
+    const auto rta{_rta.lock().get()};
+    if (!rta)
       return false;
-    return _rta.lock()->isStreamOpen();
+    return rta->isStreamOpen();
   }
 
 private:
   friend class RtSoundIO;
-  RtSoundInfo(std::weak_ptr<RtAudio> rta) : _rta(rta) {}
+
+  RtSoundInfo() {}
+
+  inline void setRtAduio(std::weak_ptr<RtAudio> rta) { _rta.swap(rta); }
 
   inline void setStreamStatus(RtAudioStreamStatus streamStatus) {
     _streamStatus.exchange(streamStatus);
   }
+
   inline void setStreamTime(double streamTime) {
     _streamTime.exchange(static_cast<unsigned long long>(streamTime * time_ms));
   }
+
   inline void setProcessingTime(long procTime) {
     _processingTime.exchange(procTime);
   }
+
   inline void setBufferTime(int nFrames, int sampleRate) {
     _bufferTime.exchange(
         static_cast<long>(double(nFrames) / double(sampleRate) * time_us));

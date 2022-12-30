@@ -10,7 +10,7 @@ void RtSoundIO::startSoundEngine(RtAudio::Api api) {
   stopSoundStream();
 
   _rta = std::make_shared<RtAudio>(api);
-  _streamInfo._rta = _rta;
+  _streamInfo.setRtAduio(_rta);
   _nextSetup.inputStream().deviceId = _rta->getDefaultInputDevice();
   _nextSetup.outputStream().deviceId = _rta->getDefaultOutputDevice();
   _currSetup = _nextSetup;

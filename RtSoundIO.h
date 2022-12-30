@@ -32,7 +32,7 @@ public:
 private:
   std::shared_ptr<RtAudio> _rta;
   RtSoundSetup _currSetup, _currSetupPub, _nextSetup;
-  RtSoundInfo _streamInfo{_rta};
+  RtSoundInfo _streamInfo;
 
   static int onHandleStream(void *outputBuffer, void *inputBuffer,
                             unsigned int nFrames, double streamTime,
