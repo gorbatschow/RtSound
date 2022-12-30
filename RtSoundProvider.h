@@ -9,7 +9,7 @@ class RtSoundClient;
 class RtSoundProvider {
 public:
   RtSoundProvider();
-  ~RtSoundProvider() {}
+  ~RtSoundProvider() = default;
 
   void addClient(std::weak_ptr<RtSoundClient> client_);
 

@@ -3,7 +3,7 @@
 #include <RtAudio.h>
 #include <cassert>
 #include <cstring>
-#include <mutex>
+#include <shared_mutex>
 
 class RtSoundData {
 public:
@@ -50,7 +50,7 @@ public:
     memcpy(dst, output(channel), framesN() * sizeof(float));
   }
 
-  mutable std::mutex mutex;
+  mutable std::shared_mutex mutex;
 
 private:
   float *_input{nullptr};

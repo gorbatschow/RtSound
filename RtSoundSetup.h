@@ -6,12 +6,12 @@ public:
   RtSoundSetup() {
     _inputStream.nChannels = 2;
     _outputStream.nChannels = 2;
-    _streamOpts.flags |= RTAUDIO_NONINTERLEAVED;
-    _streamOpts.flags |= RTAUDIO_SCHEDULE_REALTIME;
-    _streamOpts.flags |= RTAUDIO_MINIMIZE_LATENCY;
-    _streamOpts.flags |= RTAUDIO_HOG_DEVICE;
-    _streamOpts.priority = 0;
-    _streamOpts.numberOfBuffers = 1;
+    //_streamOpts.flags |= RTAUDIO_NONINTERLEAVED;
+    //_streamOpts.flags |= RTAUDIO_SCHEDULE_REALTIME;
+    //_streamOpts.flags |= RTAUDIO_MINIMIZE_LATENCY;
+    //_streamOpts.flags |= RTAUDIO_HOG_DEVICE;
+    //_streamOpts.priority = 0;
+    //_streamOpts.numberOfBuffers = 1;
     _streamOpts.streamName = "RtSoundIO";
   }
 
