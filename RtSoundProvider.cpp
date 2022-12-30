@@ -20,7 +20,6 @@ void RtSoundProvider::checkClients() {
 }
 
 void RtSoundProvider::orderClients() {
-  checkClients();
   std::sort(_clients.begin(), _clients.end(),
             [](const std::weak_ptr<RtSoundClient> &first,
                const std::weak_ptr<RtSoundClient> &second) {
@@ -28,30 +27,25 @@ void RtSoundProvider::orderClients() {
             });
 }
 
-void RtSoundProvider::notifyUpdateSoundDevices(
-    const std::vector<RtAudio::DeviceInfo> &devices) {
-  checkClients();
+void RtSoundProvider::notifyUpdateSoundDevices() {
   for (auto &client : _clients) {
-    client.lock()->updateSoundDevices(devices);
+    client.lock()->updateSoundDevices(_streamDevices);
   }
 }
 
-void RtSoundProvider::notifyConfigureStream(RtSoundSetup &setup) {
-  checkClients();
+void RtSoundProvider::notifyConfigureStream() {
   for (auto &client : _clients) {
-    client.lock()->configureStream(setup);
+    client.lock()->configureStream(streamSetup());
   }
 }
 
-void RtSoundProvider::notifyApplyStreamConfig(const RtSoundSetup &setup) {
-  checkClients();
+void RtSoundProvider::notifyApplyStreamConfig() {
   for (auto &client : _clients) {
-    client.lock()->applyStreamConfig(setup);
+    client.lock()->applyStreamConfig(streamSetup());
   }
 }
 
 void RtSoundProvider::notifyStreamDataReady() {
-  checkClients();
   for (auto &client : _clients) {
     client.lock()->streamDataReady();
   }

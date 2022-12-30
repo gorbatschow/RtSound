@@ -1,48 +1,56 @@
 #pragma once
+#include "RtSoundSetup.h"
 #include <RtAudio.h>
 #include <cassert>
 #include <cstring>
 #include <mutex>
-class RtSoundIO;
 
 class RtSoundData {
 public:
-  inline float *inputBuffer(int channel) const {
+  RtSoundData() = default;
+  ~RtSoundData() = default;
+
+  inline void setSoundSetup(const RtSoundSetup &setup) {
+    setFramesN(setup.bufferFrames());
+    setInputsN(setup.inputEnabled() ? setup.inputStream().nChannels : 0);
+    setOutputsN(setup.outputEnabled() ? setup.outputStream().nChannels : 0);
+  }
+
+  inline void setInput(float *input) { _input = input; }
+  inline float *input(int channel) const {
     assert(channel < _nInputs);
     return _input + _nFrames * channel;
   }
-  inline float *outputBuffer(int channel) const {
+
+  inline void setOutput(float *output) { _output = output; }
+  inline float *output(int channel) const {
     assert(channel < _nOutputs);
     return _output + _nFrames * channel;
   }
 
-  inline void copyInputBuffer(int channel, float *dst) const {
-    memcpy(dst, inputBuffer(channel), framesN() * sizeof(float));
-  }
-
-  inline void copyOutputBuffer(int channel, float *dst) const {
-    memcpy(dst, outputBuffer(channel), framesN() * sizeof(float));
-  }
-
+  inline void setFramesN(int nFrames) { _nFrames = nFrames; }
   inline int framesN() const { return _nFrames; }
-  inline int inputChannelsN() const { return _nInputs; }
-  inline int outputChannelsN() const { return _nOutputs; }
+
+  inline void setInputsN(int nInputs) { _nInputs = nInputs; }
+  inline int inputsN() const { return _nInputs; }
+
+  inline void setOutputsN(int nOutputs) { _nOutputs = nOutputs; }
+  inline int outputsN() const { return _nOutputs; }
+
+  inline void setStreamTime(double streamTime) { _streamTime = streamTime; }
   inline double streamTime() const { return _streamTime; }
+
   inline int result() const { return _result; }
+  inline void setResult(int result) { _result = result; }
+
+  inline void copyInput(int channel, float *dst) const {
+    memcpy(dst, input(channel), framesN() * sizeof(float));
+  }
+  inline void copyOutput(int channel, float *dst) const {
+    memcpy(dst, output(channel), framesN() * sizeof(float));
+  }
 
   mutable std::mutex mutex;
-
-private:
-  friend class RtSoundIO;
-  friend class RtSoundProvider;
-  RtSoundData() {}
-  void setInput(float *input) { _input = input; }
-  inline void setOutput(float *output) { _output = output; }
-  inline void setFramesN(int nFrames) { _nFrames = nFrames; }
-  inline void setInputChannelsN(int nInputs) { _nInputs = nInputs; }
-  inline void setOutputChannelsN(int nOutputs) { _nOutputs = nOutputs; }
-  inline void setStreamTime(double streamTime) { _streamTime = streamTime; }
-  inline void setResult(int result) { _result = result; }
 
 private:
   float *_input{nullptr};

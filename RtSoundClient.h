@@ -22,7 +22,7 @@ public:
   const RtSoundSetup &streamSetup() const {
     const auto ptr{_streamSetup.lock().get()};
     assert(ptr != nullptr);
-    return *ptr;
+    return (*ptr);
   }
 
   inline void setStreamData(std::weak_ptr<RtSoundData> data) {
@@ -33,7 +33,7 @@ public:
   const RtSoundData &streamData() const {
     const auto ptr{_streamData.lock().get()};
     assert(ptr != nullptr);
-    return *ptr;
+    return (*ptr);
   }
 
 protected:

@@ -5,18 +5,34 @@
 
 class RtSoundInfo {
 public:
-  ~RtSoundInfo() {}
+  RtSoundInfo() = default;
+  ~RtSoundInfo() = default;
 
+  inline void setRtAduio(std::weak_ptr<RtAudio> rta) { _rta.swap(rta); }
+
+  inline void setStreamStatus(RtAudioStreamStatus streamStatus) {
+    _streamStatus.exchange(streamStatus);
+  }
   inline RtAudioStreamStatus streamStatus() const {
     return _streamStatus.load();
   }
 
+  inline void setStreamTime(double streamTime) {
+    _streamTime.exchange(static_cast<unsigned long long>(streamTime * time_ms));
+  }
   inline double streamTime() const {
     return static_cast<double>(_streamTime.load()) / time_ms;
   }
 
+  inline void setProcessingTime(long procTime) {
+    _processingTime.exchange(procTime);
+  }
   inline long processingTime() const { return _processingTime.load(); }
 
+  inline void setBufferTime(int nFrames, int sampleRate) {
+    _bufferTime.exchange(
+        static_cast<long>(double(nFrames) / double(sampleRate) * time_us));
+  }
   inline long bufferTime() const { return _bufferTime.load(); }
 
   inline bool streamRunning() const {
@@ -33,36 +49,25 @@ public:
     return rta->isStreamOpen();
   }
 
+  inline std::vector<RtAudio::DeviceInfo> listStreamDevices() const {
+    const auto rta{_rta.lock().get()};
+    if (!rta)
+      return {};
+    std::vector<RtAudio::DeviceInfo> devices;
+    const auto ids{rta->getDeviceIds()};
+    devices.reserve(ids.size());
+    for (auto &id : ids) {
+      devices.push_back(rta->getDeviceInfo(id));
+    }
+    return devices;
+  }
+
 private:
-  friend class RtSoundIO;
-
-  RtSoundInfo() {}
-
-  inline void setRtAduio(std::weak_ptr<RtAudio> rta) { _rta.swap(rta); }
-
-  inline void setStreamStatus(RtAudioStreamStatus streamStatus) {
-    _streamStatus.exchange(streamStatus);
-  }
-
-  inline void setStreamTime(double streamTime) {
-    _streamTime.exchange(static_cast<unsigned long long>(streamTime * time_ms));
-  }
-
-  inline void setProcessingTime(long procTime) {
-    _processingTime.exchange(procTime);
-  }
-
-  inline void setBufferTime(int nFrames, int sampleRate) {
-    _bufferTime.exchange(
-        static_cast<long>(double(nFrames) / double(sampleRate) * time_us));
-  }
-
+  std::weak_ptr<RtAudio> _rta;
   std::atomic<RtAudioStreamStatus> _streamStatus{};
   std::atomic_ullong _streamTime{};
   std::atomic_long _processingTime{};
   std::atomic_long _bufferTime{};
-
   const double time_ms{1e3};
   const double time_us{1e6};
-  std::weak_ptr<RtAudio> _rta;
 };
