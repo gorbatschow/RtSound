@@ -20,11 +20,9 @@ void RtSoundProvider::checkClients() {
 }
 
 void RtSoundProvider::orderClients() {
-  std::sort(_clients.begin(), _clients.end(),
-            [](const std::weak_ptr<RtSoundClient> &first,
-               const std::weak_ptr<RtSoundClient> &second) {
-              return first.lock().get()->priority() < second.lock()->priority();
-            });
+  std::sort(_clients.begin(), _clients.end(), [](auto &first, auto &second) {
+    return first.lock().get()->priority() < second.lock()->priority();
+  });
 }
 
 void RtSoundProvider::notifyUpdateSoundDevices() {
