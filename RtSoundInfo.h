@@ -1,6 +1,7 @@
 #pragma once
 #include <RtAudio.h>
 #include <atomic>
+#include <cassert>
 #include <memory>
 
 class RtSoundInfo {
@@ -8,7 +9,10 @@ public:
   RtSoundInfo() = default;
   ~RtSoundInfo() = default;
 
-  inline void setRtAduio(std::weak_ptr<RtAudio> rta) { _rta.swap(rta); }
+  inline void setRtAduio(std::weak_ptr<RtAudio> rta) {
+    assert(rta.lock() != nullptr);
+    _rta.swap(rta);
+  }
 
   inline void setStreamStatus(RtAudioStreamStatus streamStatus) {
     _streamStatus.exchange(streamStatus);
@@ -47,19 +51,6 @@ public:
     if (!rta)
       return false;
     return rta->isStreamOpen();
-  }
-
-  inline std::vector<RtAudio::DeviceInfo> listStreamDevices() const {
-    const auto rta{_rta.lock().get()};
-    if (!rta)
-      return {};
-    std::vector<RtAudio::DeviceInfo> devices;
-    const auto ids{rta->getDeviceIds()};
-    devices.reserve(ids.size());
-    for (auto &id : ids) {
-      devices.push_back(rta->getDeviceInfo(id));
-    }
-    return devices;
   }
 
 private:

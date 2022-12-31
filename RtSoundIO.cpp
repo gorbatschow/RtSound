@@ -11,13 +11,7 @@ void RtSoundIO::startSoundEngine(RtAudio::Api api) {
 
   _rta = std::make_shared<RtAudio>(api);
   _streamInfo.setRtAduio(_rta);
-
-  _streamProvider.streamSetup().inputStream().deviceId =
-      _rta->getDefaultInputDevice();
-  _streamProvider.streamSetup().outputStream().deviceId =
-      _rta->getDefaultOutputDevice();
-
-  _streamProvider.setStreamDevices(_streamInfo.listStreamDevices());
+  _streamProvider.setRtAduio(_rta);
   _streamProvider.notifyUpdateSoundDevices();
   _streamProvider.notifyApplyStreamConfig();
 }

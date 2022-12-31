@@ -26,8 +26,9 @@ void RtSoundProvider::orderClients() {
 }
 
 void RtSoundProvider::notifyUpdateSoundDevices() {
+  const auto devices{_streamSetup->listStreamDevices()};
   for (auto &client : _clients) {
-    client.lock()->updateSoundDevices(_streamDevices);
+    client.lock()->updateSoundDevices(devices);
   }
 }
 

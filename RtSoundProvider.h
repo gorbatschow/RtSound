@@ -11,6 +11,11 @@ public:
   RtSoundProvider();
   ~RtSoundProvider() = default;
 
+  inline void setRtAduio(std::weak_ptr<RtAudio> rta) {
+    assert(rta.lock() != nullptr);
+    _streamSetup->setRtAduio(rta);
+  }
+
   void addClient(std::weak_ptr<RtSoundClient> client_);
 
   void checkClients();
@@ -19,15 +24,6 @@ public:
   void notifyConfigureStream();
   void notifyApplyStreamConfig();
   void notifyStreamDataReady();
-
-  inline void
-  setStreamDevices(const std::vector<RtAudio::DeviceInfo> &devices) {
-    _streamDevices = devices;
-  }
-
-  inline const std::vector<RtAudio::DeviceInfo> &streamDevcies() const {
-    return _streamDevices;
-  }
 
   inline RtSoundSetup &streamSetup() {
     const auto ptr{_streamSetup.get()};
@@ -45,5 +41,4 @@ private:
   std::vector<std::weak_ptr<RtSoundClient>> _clients;
   std::shared_ptr<RtSoundSetup> _streamSetup{new RtSoundSetup()};
   std::shared_ptr<RtSoundData> _streamData{new RtSoundData()};
-  std::vector<RtAudio::DeviceInfo> _streamDevices;
 };
