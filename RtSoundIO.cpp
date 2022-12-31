@@ -26,6 +26,7 @@ void RtSoundIO::startSoundStream(bool shot) {
   stopSoundStream();
   _streamProvider.orderClients();
   _streamProvider.notifyConfigureStream();
+  _streamProvider.streamSetup().streamOpts().flags |= RTAUDIO_NONINTERLEAVED;
   _streamProvider.streamData().setSoundSetup(_streamProvider.streamSetup());
   _streamProvider.streamData().setResult(shot ? 1 : 0);
 
