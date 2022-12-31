@@ -6,13 +6,19 @@ class RtSoundBaseGen : public RtSoundClient {
 public:
   RtSoundBaseGen(int priority = 0);
 
-  inline void setInputEnabled(bool value) { _inputEnabled.exchange(value); }
+  inline void setInputEnabled(bool value) {
+    _inputChanged.exchange(true);
+    _inputEnabled.exchange(value);
+  }
   inline bool inputEnabled() const { return _inputEnabled.load(); }
 
   inline void setInputChannel(int value) { _inputChannel.exchange(value); }
   inline int inputChannel() const { return _inputChannel.load(); }
 
-  inline void setOutputEnabled(bool value) { _outputEnabled.exchange(value); }
+  inline void setOutputEnabled(bool value) {
+    _outputChanged.exchange(true);
+    _outputEnabled.exchange(value);
+  }
   inline bool outputEnabled() const { return _outputEnabled.load(); }
 
   inline void setOutputChannel(int value) { _outputChannel.exchange(value); }
@@ -23,13 +29,14 @@ protected:
 
 private:
   std::atomic_int _inputChannel{};
-  std::atomic_bool _inputEnabled{false};
+  std::atomic_bool _inputEnabled{};
+  std::atomic_bool _inputChanged{};
 
   std::atomic_int _outputChannel{};
-  std::atomic_bool _outputEnabled{false};
+  std::atomic_bool _outputEnabled{};
+  std::atomic_bool _outputChanged{};
 
-  virtual void streamDataReady() override final;
+  virtual void streamDataReady(const RtSoundData &data) override final;
 
-  void fillInput(const RtSoundData &streamData) const;
-  void fillOutput(const RtSoundData &streamData) const;
+  void fillSignal(const RtSoundData &streamData, float *buffer) const;
 };

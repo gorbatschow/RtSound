@@ -20,20 +20,22 @@ public:
   void notifyApplyStreamConfig();
   void notifyStreamDataReady();
 
-  void setStreamDevices(const std::vector<RtAudio::DeviceInfo> &devices) {
+  inline void
+  setStreamDevices(const std::vector<RtAudio::DeviceInfo> &devices) {
     _streamDevices = devices;
   }
-  const std::vector<RtAudio::DeviceInfo> &streamDevcies() const {
+
+  inline const std::vector<RtAudio::DeviceInfo> &streamDevcies() const {
     return _streamDevices;
   }
 
-  RtSoundSetup &streamSetup() {
+  inline RtSoundSetup &streamSetup() {
     const auto ptr{_streamSetup.get()};
     assert(ptr != nullptr);
     return (*ptr);
   }
 
-  RtSoundData &streamData() {
+  inline RtSoundData &streamData() {
     const auto ptr{_streamData.get()};
     assert(ptr != nullptr);
     return (*ptr);

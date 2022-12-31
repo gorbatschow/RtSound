@@ -16,17 +16,29 @@ public:
     setOutputsN(setup.outputEnabled() ? setup.outputStream().nChannels : 0);
   }
 
-  inline void setInput(float *input) { _input = input; }
-  inline float *input(int channel) const {
+  inline void setInputBuffer(float *input) { _input = input; }
+  inline float *inputBuffer(int channel = 0) const {
     assert(channel < _nInputs);
     return _input + _nFrames * channel;
   }
 
-  inline void setOutput(float *output) { _output = output; }
-  inline float *output(int channel) const {
+  inline void nullifyInputBuffer() const {
+    memset(inputBuffer(), 0, inputBufferSize() * sizeof(float));
+  }
+
+  inline int inputBufferSize() const { return _nInputs * _nFrames; }
+
+  inline void setOutputBuffer(float *output) { _output = output; }
+  inline float *outputBuffer(int channel = 0) const {
     assert(channel < _nOutputs);
     return _output + _nFrames * channel;
   }
+
+  inline void nullifyOutputBuffer() const {
+    memset(outputBuffer(), 0, outputBufferSize() * sizeof(float));
+  }
+
+  inline int outputBufferSize() const { return _nOutputs * _nFrames; }
 
   inline void setFramesN(int nFrames) { _nFrames = nFrames; }
   inline int framesN() const { return _nFrames; }
@@ -44,10 +56,10 @@ public:
   inline void setResult(int result) { _result = result; }
 
   inline void copyInput(int channel, float *dst) const {
-    memcpy(dst, input(channel), framesN() * sizeof(float));
+    memcpy(dst, inputBuffer(channel), framesN() * sizeof(float));
   }
   inline void copyOutput(int channel, float *dst) const {
-    memcpy(dst, output(channel), framesN() * sizeof(float));
+    memcpy(dst, outputBuffer(channel), framesN() * sizeof(float));
   }
 
   mutable std::shared_mutex mutex;

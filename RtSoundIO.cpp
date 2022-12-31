@@ -60,8 +60,8 @@ int RtSoundIO::onHandleStream(void *outputBuffer, void *inputBuffer,
   auto &data{io._streamProvider.streamData()};
   auto &setup{io.streamProvider().streamSetup()};
 
-  data.setOutput(static_cast<float *>(outputBuffer));
-  data.setInput(static_cast<float *>(inputBuffer));
+  data.setInputBuffer(static_cast<float *>(inputBuffer));
+  data.setOutputBuffer(static_cast<float *>(outputBuffer));
   data.setFramesN(int(nFrames));
   data.setStreamTime(streamTime);
 

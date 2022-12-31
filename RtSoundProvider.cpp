@@ -45,6 +45,6 @@ void RtSoundProvider::notifyApplyStreamConfig() {
 
 void RtSoundProvider::notifyStreamDataReady() {
   for (auto &client : _clients) {
-    client.lock()->streamDataReady();
+    client.lock()->streamDataReady(streamData());
   }
 }

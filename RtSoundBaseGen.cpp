@@ -4,42 +4,32 @@
 
 RtSoundBaseGen::RtSoundBaseGen(int priority) : RtSoundClient(priority) {}
 
-void RtSoundBaseGen::streamDataReady() {
-  if (_inputEnabled) {
-    fillInput(streamData());
+void RtSoundBaseGen::streamDataReady(const RtSoundData &data) {
+  assert(_inputChannel >= 0);
+  assert(_outputChannel >= 0);
+
+  if (_inputChanged && data.inputsN() > 0) {
+    std::unique_lock(data.mutex);
+    data.nullifyInputBuffer();
+    _inputChanged = false;
   }
 
-  if (_outputEnabled) {
-    fillOutput(streamData());
+  if (_outputChanged && data.outputsN() > 0) {
+    std::unique_lock(data.mutex);
+    data.nullifyOutputBuffer();
+    _outputChanged = false;
   }
-}
 
-void RtSoundBaseGen::fillInput(const RtSoundData &data) const {
-  std::unique_lock(data.mutex);
-  if (data.inputsN() < 1 || data.inputsN() - 1 < _inputChannel) {
-    return;
+  if (_inputEnabled && data.inputsN() > 0 && data.inputsN() > _inputChannel) {
+    std::unique_lock(data.mutex);
+    generate(data.inputBuffer(_inputChannel), data.framesN(),
+             data.streamTime());
   }
-  if (_inputChannel > 0) {
-    generate(data.input(_inputChannel), data.framesN(), data.streamTime());
-  } else {
-    generate(data.input(0), data.framesN(), data.streamTime());
-    for (int chan = 0; chan != data.inputsN(); ++chan) {
-      std::memcpy(data.input(0), data.input(chan), data.framesN());
-    }
-  }
-}
 
-void RtSoundBaseGen::fillOutput(const RtSoundData &data) const {
-  std::unique_lock lock(data.mutex);
-  if (data.outputsN() < 1 || data.outputsN() - 1 < _outputChannel) {
-    return;
-  }
-  if (_outputChannel > 0) {
-    generate(data.output(_outputChannel), data.framesN(), data.streamTime());
-  } else {
-    generate(data.output(0), data.framesN(), data.streamTime());
-    for (int chan = 0; chan != data.outputsN(); ++chan) {
-      std::memcpy(data.output(0), data.output(chan), data.framesN());
-    }
+  if (_outputEnabled && data.outputsN() > 0 &&
+      data.outputsN() > _outputChannel) {
+    std::unique_lock(data.mutex);
+    generate(data.outputBuffer(_outputChannel), data.framesN(),
+             data.streamTime());
   }
 }
