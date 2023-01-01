@@ -7,6 +7,8 @@
 class RtSoundInfo {
 public:
   RtSoundInfo() = default;
+  RtSoundInfo(const RtSoundInfo &) = delete;
+  RtSoundInfo &operator=(const RtSoundInfo &) = delete;
   ~RtSoundInfo() = default;
 
   inline void setRtAduio(std::weak_ptr<RtAudio> rta) {

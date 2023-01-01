@@ -8,6 +8,8 @@
 class RtSoundData {
 public:
   RtSoundData() = default;
+  RtSoundData(const RtSoundData &) = delete;
+  RtSoundData &operator=(const RtSoundData &) = delete;
   ~RtSoundData() = default;
 
   inline void setSoundSetup(const RtSoundSetup &setup) {
