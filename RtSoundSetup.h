@@ -5,7 +5,7 @@
 
 class RtSoundSetup {
 public:
-  static inline const std::pair<int, int> MinMaxChannel{0, 99};
+  static inline const std::pair<int, int> MinMaxChannel{0, 95};
 
   RtSoundSetup() {
     _inputStream.nChannels = 2;
