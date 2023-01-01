@@ -15,6 +15,10 @@ public:
   void startSoundStream(bool shot = false);
   void stopSoundStream();
 
+  inline void addClient(std::weak_ptr<RtSoundClient> client) {
+    _streamProvider.addClient(client);
+  }
+
   inline const RtSoundInfo &streamInfo() const { return _streamInfo; }
   inline RtSoundProvider &streamProvider() { return _streamProvider; }
 
