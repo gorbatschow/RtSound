@@ -2,12 +2,14 @@
 #include <chrono>
 #include <random>
 
-RtSoundNoiseGen::RtSoundNoiseGen() {}
+RtSoundNoiseGen::RtSoundNoiseGen(int priority) : RtSoundBaseGen(priority) {}
 
-void RtSoundNoiseGen::beforeStartStream(const RtSoundSetup &setup) {}
+void RtSoundNoiseGen::applyStreamConfig(const RtSoundSetup &setup) {}
 
-void RtSoundNoiseGen::receiveStreamData(const RtStreamData &streamData) {
-  std::default_random_engine gen;
-  auto distr{std::bind(std::normal_distribution<float>{0.0f, 0.3f},
-                       std::mt19937(std::random_device{}()))};
+void RtSoundNoiseGen::generate(float *buffer, int nFrames, double t) {
+  const float A{float(_amplitude.load()) * _da};
+  for (int i = 0; i != nFrames; ++i) {
+    std::normal_distribution<float> val(0.0f, A);
+    buffer[i] = val(_rgen);
+  }
 }

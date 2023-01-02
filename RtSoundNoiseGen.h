@@ -1,12 +1,22 @@
 #pragma once
-#include "RtSoundClient.h"
+#include "RtSoundBaseGen.h"
+#include <random>
 
-class RtSoundNoiseGen : public RtSoundClient {
+class RtSoundNoiseGen : public RtSoundBaseGen {
 
 public:
-  RtSoundNoiseGen();
+  RtSoundNoiseGen(int priority = 0);
+  ~RtSoundNoiseGen() override = default;
 
-protected:
-  virtual void beforeStartStream(const RtSoundSetup &setup) override;
-  virtual void receiveStreamData(const RtStreamData &streamData) override;
+  inline void setAmplitude(int percent) { _amplitude.exchange(percent); }
+  inline int amplitude() { return _amplitude.load(); }
+
+private:
+  void applyStreamConfig(const RtSoundSetup &setup) override final;
+  void generate(float *buffer, int nFrames, double t) override final;
+
+  float _da{1.0f / 100.0f / 3.3f};
+  std::atomic_int _amplitude{1};
+  std::random_device _rdev;
+  std::mt19937 _rgen{_rdev()};
 };

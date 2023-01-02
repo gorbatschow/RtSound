@@ -5,7 +5,7 @@
 class RtSoundBaseGen : public RtSoundClient {
 public:
   RtSoundBaseGen(int priority = 0);
-  ~RtSoundBaseGen() = default;
+  virtual ~RtSoundBaseGen(){};
 
   // Input
   // ---------------------------------------------------------------------------
@@ -36,7 +36,7 @@ public:
   inline int outputChannel() const { return _outputChannel.load(); }
 
 protected:
-  virtual void generate(float *buffer, int nFrames, double t) const {}
+  virtual void generate(float *buffer, int nFrames, double t) {}
 
 private:
   std::atomic_int _inputChannel{};
