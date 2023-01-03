@@ -26,7 +26,7 @@ void RtSoundIO::startSoundStream(bool shot) {
   _streamProvider.streamData().setResult(shot ? 1 : 0);
 
   auto &setup{_streamProvider.streamSetup()};
-  assert(!setup.inputEnabled() || !setup.outputEnabled());
+  assert(setup.inputEnabled() || setup.outputEnabled());
   assert(setup.inputChannels() > 0 || setup.outputChannels() > 0);
 
   const RtAudioErrorType rterr{_rta->openStream(
