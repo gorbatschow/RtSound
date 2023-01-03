@@ -9,7 +9,7 @@ The main idea is to implement observer pattern for audio stream related events, 
 - to receive audio stream data - `RtSoundClient::streamDataReady`
 
 ## Usage
-You can find a complete example here  ![RtSoundIODemo](https://github.com/gorbatschow/RtSoundIO).
+You can find a complete example here  ![RtSoundIODemo](https://github.com/gorbatschow/RtSoundIODemo).
 In this example we want to make a signal (sine wave) generator and stream signal to sound card's output.
 It could be someting like this:
 
