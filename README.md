@@ -1,5 +1,5 @@
 # RtSoundIO
-OOP-style wrapper for RtAudio
+The OOP-style wrapper for RtAudio
 
 ## Concept
 The main idea is to implement observer pattern for audio stream related events, so this library contains a client base class `RtSoundClient` with relevant virtual methods. These events are the following:
