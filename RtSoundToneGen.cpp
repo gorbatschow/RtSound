@@ -2,10 +2,6 @@
 #include <cmath>
 #include <cstring>
 
-RtSoundToneGen::RtSoundToneGen(int priority) : RtSoundBaseGen(priority) {}
-
-RtSoundToneGen::~RtSoundToneGen() {}
-
 void RtSoundToneGen::applyStreamConfig(const RtSoundSetup &setup) {
   _dt = setup.timeResolution();
   _df = setup.frequencyResolution();

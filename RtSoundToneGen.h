@@ -4,8 +4,8 @@
 
 class RtSoundToneGen : public RtSoundBaseGen {
 public:
-  RtSoundToneGen(int priority = 0);
-  ~RtSoundToneGen() override;
+  RtSoundToneGen(int priority = 0) : RtSoundBaseGen(priority){};
+  ~RtSoundToneGen() override = default;
 
   inline void setAmplitude(int percent) { _amplitude.exchange(percent); }
   inline int amplitude() { return _amplitude.load(); }

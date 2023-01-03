@@ -9,7 +9,8 @@
 
 class RtSoundIO {
 public:
-  RtSoundIO();
+  RtSoundIO() = default;
+  ~RtSoundIO() = default;
 
   void startSoundEngine(RtAudio::Api api = RtAudio::UNSPECIFIED);
   void startSoundStream(bool shot = false);
@@ -21,6 +22,7 @@ public:
 
   inline const RtSoundInfo &streamInfo() const { return _streamInfo; }
   inline RtSoundProvider &streamProvider() { return _streamProvider; }
+  inline RtSoundSetup &streamSetup() { return _streamProvider.streamSetup(); }
 
 private:
   std::shared_ptr<RtAudio> _rta;

@@ -2,8 +2,6 @@
 #include <cstring>
 #include <mutex>
 
-RtSoundBaseGen::RtSoundBaseGen(int priority) : RtSoundClient(priority) {}
-
 void RtSoundBaseGen::streamDataReady(const RtSoundData &data) {
   assert(_inputChannel >= 0);
   assert(_outputChannel >= 0);

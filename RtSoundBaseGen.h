@@ -4,8 +4,8 @@
 
 class RtSoundBaseGen : public RtSoundClient {
 public:
-  RtSoundBaseGen(int priority = 0);
-  virtual ~RtSoundBaseGen(){};
+  RtSoundBaseGen(int priority = 0) : RtSoundClient(priority) {}
+  virtual ~RtSoundBaseGen() = default;
 
   // Input
   // ---------------------------------------------------------------------------
@@ -47,7 +47,5 @@ private:
   std::atomic_bool _outputEnabled{};
   std::atomic_bool _outputChanged{};
 
-  virtual void streamDataReady(const RtSoundData &data) override final;
-
-  void fillSignal(const RtSoundData &streamData, float *buffer) const;
+  void streamDataReady(const RtSoundData &data) override final;
 };

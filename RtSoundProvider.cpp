@@ -2,8 +2,6 @@
 #include "RtSoundClient.h"
 #include <algorithm>
 
-RtSoundProvider::RtSoundProvider() {}
-
 void RtSoundProvider::addClient(std::weak_ptr<RtSoundClient> client_) {
   const auto client{client_.lock().get()};
   assert(client != nullptr);

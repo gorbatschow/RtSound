@@ -5,14 +5,7 @@
 
 class RtSoundSetup {
 public:
-  RtSoundSetup() {
-    _inputStream.nChannels = 2;
-    _outputStream.nChannels = 2;
-    _streamOpts.streamName = "RtSoundIO";
-    _streamOpts.priority = 0;
-    _streamOpts.numberOfBuffers = 2;
-  }
-
+  RtSoundSetup() = default;
   ~RtSoundSetup() = default;
 
   void setRtAduio(std::weak_ptr<RtAudio> rta) {
@@ -176,8 +169,8 @@ private:
   std::weak_ptr<RtAudio> _rta;
   int _sampleRate{48000};
   unsigned int _bufferFrames{1024};
-  bool _inputEnabled{true};
-  bool _outputEnabled{false};
+  bool _inputEnabled{};
+  bool _outputEnabled{};
   RtAudio::StreamOptions _streamOpts;
   RtAudio::StreamParameters _inputStream;
   RtAudio::StreamParameters _outputStream;

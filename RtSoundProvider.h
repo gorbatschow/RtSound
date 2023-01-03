@@ -8,7 +8,7 @@ class RtSoundClient;
 
 class RtSoundProvider {
 public:
-  RtSoundProvider();
+  RtSoundProvider() = default;
   ~RtSoundProvider() = default;
 
   inline void setRtAduio(std::weak_ptr<RtAudio> rta) {

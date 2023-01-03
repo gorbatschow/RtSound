@@ -1,10 +1,7 @@
 #include "RtSoundIO.h"
-#include <RtSoundClient.h>
 #include <chrono>
 #include <random>
 #include <thread>
-
-RtSoundIO::RtSoundIO() {}
 
 void RtSoundIO::startSoundEngine(RtAudio::Api api) {
   stopSoundStream();
@@ -17,6 +14,10 @@ void RtSoundIO::startSoundEngine(RtAudio::Api api) {
 }
 
 void RtSoundIO::startSoundStream(bool shot) {
+  if (!_rta) {
+    startSoundEngine();
+  }
+
   stopSoundStream();
   _streamProvider.orderClients();
   _streamProvider.notifyConfigureStream();
@@ -25,6 +26,9 @@ void RtSoundIO::startSoundStream(bool shot) {
   _streamProvider.streamData().setResult(shot ? 1 : 0);
 
   auto &setup{_streamProvider.streamSetup()};
+  assert(!setup.inputEnabled() || !setup.outputEnabled());
+  assert(setup.inputChannels() > 0 || setup.outputChannels() > 0);
+
   const RtAudioErrorType rterr{_rta->openStream(
       setup.outputStreamPtr(), setup.inputStreamPtr(), RTAUDIO_FLOAT32,
       setup.sampleRate(), setup.bufferFramesPtr(), &RtSoundIO::onHandleStream,
@@ -37,14 +41,17 @@ void RtSoundIO::startSoundStream(bool shot) {
 }
 
 void RtSoundIO::stopSoundStream() {
-  if (!_rta)
+  if (!_rta) {
     return;
+  }
 
-  if (_rta->isStreamRunning())
+  if (_rta->isStreamRunning()) {
     _rta->stopStream();
+  }
 
-  if (_rta->isStreamOpen())
+  if (_rta->isStreamOpen()) {
     _rta->closeStream();
+  }
 }
 
 int RtSoundIO::onHandleStream(void *outputBuffer, void *inputBuffer,
