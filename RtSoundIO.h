@@ -17,17 +17,19 @@ public:
   void stopSoundStream();
 
   inline void addClient(std::weak_ptr<RtSoundClient> client) {
-    _streamProvider.addClient(client);
+    _streamProvider->addClient(client);
   }
 
   inline const RtSoundInfo &streamInfo() const { return _streamInfo; }
-  inline RtSoundProvider &streamProvider() { return _streamProvider; }
-  inline RtSoundSetup &streamSetup() { return _streamProvider.streamSetup(); }
+  inline RtSoundProvider &streamProvider() { return (*_streamProvider); }
+  inline RtSoundSetup &streamSetup() {
+    return (_streamProvider->streamSetup());
+  }
 
 private:
   std::shared_ptr<RtAudio> _rta;
+  std::shared_ptr<RtSoundProvider> _streamProvider{new RtSoundProvider()};
   RtSoundInfo _streamInfo;
-  RtSoundProvider _streamProvider;
 
   static int onHandleStream(void *outputBuffer, void *inputBuffer,
                             unsigned int nFrames, double streamTime,

@@ -3,10 +3,15 @@
 #include <random>
 
 class RtSoundNoiseGen : public RtSoundBaseGen {
-
 public:
-  RtSoundNoiseGen(int priority = 0);
+  RtSoundNoiseGen(int priority = 0) : RtSoundBaseGen(priority) {
+    setClientName("Noise Generator");
+  }
   ~RtSoundNoiseGen() override = default;
+
+  virtual const std::type_info &clientTypeId() const override {
+    return typeid(this);
+  }
 
   inline void setAmplitude(int percent) { _amplitude.exchange(percent); }
   inline int amplitude() { return _amplitude.load(); }

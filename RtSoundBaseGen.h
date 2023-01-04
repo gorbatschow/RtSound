@@ -7,6 +7,10 @@ public:
   RtSoundBaseGen(int priority = 0) : RtSoundClient(priority) {}
   virtual ~RtSoundBaseGen() = default;
 
+  virtual const std::type_info &clientTypeId() const override {
+    return typeid(this);
+  }
+
   // Input
   // ---------------------------------------------------------------------------
   inline void setInputEnabled(bool value) {

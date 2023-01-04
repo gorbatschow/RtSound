@@ -2,8 +2,6 @@
 #include <chrono>
 #include <random>
 
-RtSoundNoiseGen::RtSoundNoiseGen(int priority) : RtSoundBaseGen(priority) {}
-
 void RtSoundNoiseGen::applyStreamConfig(const RtSoundSetup &setup) {}
 
 void RtSoundNoiseGen::generate(float *buffer, int nFrames, double t) {

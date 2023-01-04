@@ -4,8 +4,14 @@
 
 class RtSoundToneGen : public RtSoundBaseGen {
 public:
-  RtSoundToneGen(int priority = 0) : RtSoundBaseGen(priority){};
+  RtSoundToneGen(int priority = 0) : RtSoundBaseGen(priority) {
+    setClientName("Tone Generator");
+  };
   ~RtSoundToneGen() override = default;
+
+  virtual const std::type_info &clientTypeId() const override {
+    return typeid(this);
+  }
 
   inline void setAmplitude(int percent) { _amplitude.exchange(percent); }
   inline int amplitude() { return _amplitude.load(); }
