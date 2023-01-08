@@ -47,18 +47,6 @@ public:
   inline void setInputsN(int nInputs) { _nInputs = nInputs; }
   inline int inputsN() const { return _nInputs; }
 
-  inline void copyInput(int channel, float *dst) const {
-    memcpy(dst, inputBuffer(channel), framesN() * sizeof(float));
-  }
-
-  inline void rcopyInput(int channel, float *dst) const {
-    const float *src = inputBuffer(channel);
-    int i{0}, n{framesN()};
-    for (i = 0; i < n; ++i) {
-      dst[n - 1 - i] = src[i];
-    }
-  }
-
   // Output
   // ---------------------------------------------------------------------------
   inline void setOutputBuffer(float *output) { _output = output; }
@@ -75,18 +63,6 @@ public:
   inline int outputsN() const { return _nOutputs; }
 
   inline int outputBufferSize() const { return _nOutputs * _nFrames; }
-
-  inline void copyOutput(int channel, float *dst) const {
-    memcpy(dst, outputBuffer(channel), framesN() * sizeof(float));
-  }
-
-  inline void rcopyOutput(int channel, float *dst) const {
-    const float *src = outputBuffer(channel);
-    int i{0}, n{framesN()};
-    for (i = 0; i < n; ++i) {
-      dst[n - 1 - i] = src[i];
-    }
-  }
 
 private:
   float *_input{nullptr};

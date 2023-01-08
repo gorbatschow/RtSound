@@ -10,6 +10,8 @@ class RtSoundClient {
 
 public:
   RtSoundClient(int priority = 0) : _priority(priority) {}
+  RtSoundClient(const RtSoundClient &) = delete;
+  RtSoundClient &operator=(const RtSoundClient &) = delete;
   virtual ~RtSoundClient() = default;
 
   inline void setPriority(int priority) { _priority = priority; }
@@ -19,6 +21,10 @@ public:
   inline const std::string &clientName() const { return _clientName; }
 
   virtual const std::type_info &clientTypeId() const { return typeid(this); }
+
+  inline const std::uintptr_t clientId() const {
+    return reinterpret_cast<std::uintptr_t>(this);
+  }
 
   const RtSoundProvider &streamProvider() const {
     const auto ptr{_streamProvider.lock()};

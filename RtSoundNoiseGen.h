@@ -17,8 +17,13 @@ public:
   inline int amplitude() { return _amplitude.load(); }
 
 private:
-  void applyStreamConfig(const RtSoundSetup &setup) override final;
-  void generate(float *buffer, int nFrames, double t) override final;
+  void generate(float *buffer, int nFrames) override final {
+    const float A{float(_amplitude.load()) * _da};
+    for (int i = 0; i != nFrames; ++i) {
+      std::normal_distribution<float> val(0.0f, A);
+      buffer[i] = val(_rgen);
+    }
+  }
 
   float _da{1.0f / 100.0f / 3.3f};
   std::atomic_int _amplitude{1};

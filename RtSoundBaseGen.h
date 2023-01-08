@@ -11,45 +11,51 @@ public:
     return typeid(this);
   }
 
-  // Input
+  // Enabled
   // ---------------------------------------------------------------------------
-  inline void setInputEnabled(bool value) {
-    _inputChanged.exchange(true);
-    _inputEnabled.exchange(value);
-  }
-  inline bool inputEnabled() const { return _inputEnabled.load(); }
+  inline void setEnabled(bool value) { _enabled.exchange(value); }
+  inline bool enabled() const { return _enabled.load(); }
 
-  inline void setInputChannel(int value) {
-    _inputChanged.exchange(true);
-    _inputChannel.exchange(value);
-  }
-  inline int inputChannel() const { return _inputChannel.load(); }
-
-  // Output
+  // Input/Output
   // ---------------------------------------------------------------------------
-  inline void setOutputEnabled(bool value) {
-    _outputChanged.exchange(true);
-    _outputEnabled.exchange(value);
-  }
-  inline bool outputEnabled() const { return _outputEnabled.load(); }
+  inline void setSendToInput(bool toInput) { _toInput.exchange(toInput); }
+  inline bool sendToInput() { return _toInput.load(); }
 
-  inline void setOutputChannel(int value) {
-    _outputChanged.exchange(true);
-    _outputChannel.exchange(value);
+  // Channel
+  // ---------------------------------------------------------------------------
+  inline void setChannel(int value) { _channel.exchange(value); }
+  inline int inputChannel() const { return _channel.load(); }
+
+  // Amplitude
+  // --------------------------------------------------------------------------
+  inline void setAmplitudePercent(float percent) {
+    assert(0.0f <= percent && percent <= 100.0f);
+    _amplitude_mP.exchange(int(percent * 1e+3f));
   }
-  inline int outputChannel() const { return _outputChannel.load(); }
+  inline float amplitudePercent() {
+    return float(_amplitude_mP.load()) * 1e-3f;
+  }
+  inline float amplitudeNormalized() { return amplitudePercent() * 1e-2f; }
 
 protected:
-  virtual void generate(float *buffer, int nFrames, double t) {}
+  virtual void streamDataReady(const RtSoundData &data) override {
+    if (!_enabled.load()) {
+      return;
+    }
+    if (_toInput.load()) {
+      std::lock_guard lock(data.mutex);
+      generate(data.inputBuffer(_channel), data.framesN());
+    } else {
+      std::lock_guard lock(data.mutex);
+      generate(data.outputBuffer(_channel), data.framesN());
+    }
+  }
+
+  virtual void generate(float *buffer, int nFrames) {}
 
 private:
-  std::atomic_int _inputChannel{};
-  std::atomic_bool _inputEnabled{};
-  std::atomic_bool _inputChanged{};
-
-  std::atomic_int _outputChannel{};
-  std::atomic_bool _outputEnabled{};
-  std::atomic_bool _outputChanged{};
-
-  void streamDataReady(const RtSoundData &data) override final;
+  std::atomic_bool _enabled{};
+  std::atomic_bool _toInput{};
+  std::atomic_int _channel{};
+  std::atomic_int _amplitude_mP{};
 };

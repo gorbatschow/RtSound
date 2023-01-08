@@ -46,4 +46,7 @@ io.stopSoundStream();
 ```
 
 
-
+## Problems & Solutions
+```
+pulseaudio -k && sudo alsa force-reload
+```
