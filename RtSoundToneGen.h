@@ -28,11 +28,11 @@ public:
   }
 
   static inline float percentTo_Hz(float fs, float fp) {
-    return fp * 0.005f * fs;
+    return fp * 5e-3f * fs;
   }
 
   static inline float percentTo_mHz(float fs, float fp) {
-    return fp * 0.005f * fs * 1e+3f;
+    return fp * 5e-3f * fs * 1e+3f;
   }
 
 private:
