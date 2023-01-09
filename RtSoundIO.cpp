@@ -26,8 +26,14 @@ void RtSoundIO::startSoundStream(bool shot) {
   _streamProvider->streamData().setResult(shot ? 1 : 0);
 
   auto &setup{_streamProvider->streamSetup()};
-  assert(setup.inputEnabled() || setup.outputEnabled());
-  assert(setup.inputChannels() > 0 || setup.outputChannels() > 0);
+  // assert(setup.inputEnabled() || setup.outputEnabled());
+  // assert(setup.inputChannels() > 0 || setup.outputChannels() > 0);
+  if (!setup.inputEnabled() || !setup.outputEnabled()) {
+    return;
+  }
+  if (!(setup.inputChannels() > 0) || !(setup.outputChannels() > 0)) {
+    return;
+  }
 
   const RtAudioErrorType rterr{_rta->openStream(
       setup.outputStreamPtr(), setup.inputStreamPtr(), RTAUDIO_FLOAT32,
