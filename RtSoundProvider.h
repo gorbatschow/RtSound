@@ -20,7 +20,7 @@ public:
   }
 
   void addClient(std::weak_ptr<RtSoundClient> client_);
-
+  void setSetupToData();
   void checkClients();
   void orderClients();
   void notifyUpdateSoundDevices();

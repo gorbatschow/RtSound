@@ -22,16 +22,16 @@ void RtSoundIO::startSoundStream(bool shot) {
   _streamProvider->orderClients();
   _streamProvider->notifyConfigureStream();
   _streamProvider->streamSetup().streamOpts().flags |= RTAUDIO_NONINTERLEAVED;
-  _streamProvider->streamData().setSoundSetup(_streamProvider->streamSetup());
   _streamProvider->streamData().setResult(shot ? 1 : 0);
+  _streamProvider->setSetupToData();
 
   auto &setup{_streamProvider->streamSetup()};
   // assert(setup.inputEnabled() || setup.outputEnabled());
   // assert(setup.inputChannels() > 0 || setup.outputChannels() > 0);
-  if (!setup.inputEnabled() || !setup.outputEnabled()) {
+  if (!setup.inputEnabled() && !setup.outputEnabled()) {
     return;
   }
-  if (!(setup.inputChannels() > 0) || !(setup.outputChannels() > 0)) {
+  if (setup.inputChannels() < 1 && setup.outputChannels() < 1) {
     return;
   }
 
@@ -76,8 +76,6 @@ int RtSoundIO::onHandleStream(void *outputBuffer, void *inputBuffer,
   io._streamProvider->notifyStreamDataReady();
   io._streamInfo.setStreamStatus(streamStatus);
   io._streamInfo.setStreamTime(streamTime);
-  io._streamInfo.setProcessingTime(io._streamProvider->streamDataReadyTime());
-  io._streamInfo.setBufferTime(nFrames, setup.sampleRate());
 
   return data.result();
 }

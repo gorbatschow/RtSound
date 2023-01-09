@@ -13,19 +13,15 @@ public:
     return typeid(this);
   }
 
-  inline void setAmplitude(int percent) { _amplitude.exchange(percent); }
-  inline int amplitude() { return _amplitude.load(); }
-
 private:
   void generate(float *buffer, int nFrames) override final {
-    const float A{float(_amplitude.load()) * _da};
+    const float A{amplitudeNormalized() / 3.f};
     for (int i = 0; i != nFrames; ++i) {
       std::normal_distribution<float> val(0.0f, A);
       buffer[i] = val(_rgen);
     }
   }
 
-  float _da{1.0f / 100.0f / 3.3f};
   std::atomic_int _amplitude{1};
   std::random_device _rdev;
   std::mt19937 _rgen{_rdev()};

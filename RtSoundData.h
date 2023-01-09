@@ -16,10 +16,17 @@ public:
     setFramesN(setup.bufferFrames());
     setInputsN(setup.inputEnabled() ? setup.inputStream().nChannels : 0);
     setOutputsN(setup.outputEnabled() ? setup.outputStream().nChannels : 0);
+    setSampleRate(setup.sampleRate());
   }
 
   inline void setFramesN(int nFrames) { _nFrames = nFrames; }
   inline int framesN() const { return _nFrames; }
+  inline long framesT() const {
+    return long(double(_nFrames) / double(_sampleRate) * 1e6);
+  }
+
+  inline void setSampleRate(int sampleRate) { _sampleRate = sampleRate; }
+  inline int sampleRate() const { return _sampleRate; }
 
   inline void setStreamTime(double streamTime) { _streamTime = streamTime; }
   inline double streamTime() const { return _streamTime; }
@@ -70,6 +77,7 @@ private:
   int _nFrames{};
   int _nInputs{};
   int _nOutputs{};
+  int _sampleRate{};
   double _streamTime{};
   int _result{};
 };

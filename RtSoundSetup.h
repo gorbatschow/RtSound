@@ -56,6 +56,9 @@ public:
     return double(_sampleRate) / double(_bufferFrames);
   }
   inline double timeResolution() const { return 1.0 / double(_sampleRate); }
+  inline long bufferTime() const {
+    return long(double(bufferFrames()) * timeResolution() * 1e6);
+  }
 
   // Stream Options
   // ---------------------------------------------------------------------------

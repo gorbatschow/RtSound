@@ -11,6 +11,10 @@ void RtSoundProvider::addClient(std::weak_ptr<RtSoundClient> client_) {
   _clients.push_back(client_);
 }
 
+void RtSoundProvider::setSetupToData() {
+  _streamData->setSoundSetup(streamSetup());
+}
+
 void RtSoundProvider::checkClients() {
   std::remove_if(_clients.begin(), _clients.end(),
                  [](const auto &ptr) { return ptr.expired(); });
@@ -43,16 +47,14 @@ void RtSoundProvider::notifyApplyStreamConfig() {
 }
 
 void RtSoundProvider::notifyStreamDataReady() {
-  _streamDataReadyTime = 0;
-  for (auto &client : _clients) {
-    const auto ptr{client.lock()};
+  for (auto &clientPtr : _clients) {
+    const auto client{clientPtr.lock()};
     const auto beginTime{std::chrono::high_resolution_clock::now()};
-    ptr->streamDataReady(streamData());
+    client->streamDataReady(streamData());
     const auto endTime{std::chrono::high_resolution_clock::now()};
     const auto duration{std::chrono::duration_cast<std::chrono::microseconds>(
                             endTime - beginTime)
                             .count()};
-    ptr->setStreamDataReadyTime(duration);
-    _streamDataReadyTime += duration;
+    client->setStreamDataReadyTime(duration);
   }
 }

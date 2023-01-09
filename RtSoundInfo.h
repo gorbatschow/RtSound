@@ -16,6 +16,7 @@ public:
     _rta.swap(rta);
   }
 
+  // Stream status
   inline void setStreamStatus(RtAudioStreamStatus streamStatus) {
     _streamStatus.exchange(streamStatus);
   }
@@ -23,6 +24,7 @@ public:
     return _streamStatus.load();
   }
 
+  // Stream time
   inline void setStreamTime(double streamTime) {
     _streamTime.exchange(static_cast<unsigned long long>(streamTime * time_ms));
   }
@@ -30,17 +32,7 @@ public:
     return static_cast<double>(_streamTime.load()) / time_ms;
   }
 
-  inline void setProcessingTime(long procTime) {
-    _processingTime.exchange(procTime);
-  }
-  inline long processingTime() const { return _processingTime.load(); }
-
-  inline void setBufferTime(int nFrames, int sampleRate) {
-    _bufferTime.exchange(
-        static_cast<long>(double(nFrames) / double(sampleRate) * time_us));
-  }
-  inline long bufferTime() const { return _bufferTime.load(); }
-
+  // Stream running
   inline bool streamRunning() const {
     const auto rta{_rta.lock().get()};
     if (!rta)
@@ -48,6 +40,7 @@ public:
     return rta->isStreamRunning();
   }
 
+  // Stream open
   inline bool streamOpen() const {
     const auto rta{_rta.lock().get()};
     if (!rta)
@@ -58,9 +51,6 @@ public:
 private:
   std::weak_ptr<RtAudio> _rta;
   std::atomic<RtAudioStreamStatus> _streamStatus{};
-  std::atomic_ullong _streamTime{};
-  std::atomic_long _processingTime{};
-  std::atomic_long _bufferTime{};
+  std::atomic_long _streamTime{};
   const double time_ms{1e3};
-  const double time_us{1e6};
 };
