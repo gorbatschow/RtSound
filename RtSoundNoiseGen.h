@@ -15,7 +15,7 @@ public:
 
 private:
   void generate(float *buffer, int nFrames) override final {
-    const float A{amplitudeNormalized() / 3.f};
+    const float A{amplitudeNormal() / 3.f};
     for (int i = 0; i != nFrames; ++i) {
       std::normal_distribution<float> val(0.0f, A);
       buffer[i] = val(_rgen);

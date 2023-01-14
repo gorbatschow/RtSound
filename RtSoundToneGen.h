@@ -1,38 +1,79 @@
 #pragma once
 #include "RtSoundBaseGen.h"
+#include "RtSoundFrequency.h"
 #include <atomic>
 #include <cmath>
 
 class RtSoundToneGen : public RtSoundBaseGen {
+
 public:
+  // Constructor
   RtSoundToneGen(int priority = 0) : RtSoundBaseGen(priority) {
     setClientName("Tone Generator");
   };
+
+  // Destructor
   ~RtSoundToneGen() override = default;
 
+  // Client Type Id
   virtual const std::type_info &clientTypeId() const override {
     return typeid(this);
   }
 
-  inline void setFrequencyPercent(float percent) {
-    assert(0.0f <= percent && percent <= 100.0f);
-    _frequency_mHz.exchange(int(percentTo_mHz(_sampleRate, percent)));
+  // Frequency Index
+  // ---------------------------------------------------------------------------
+  inline void setFrequencyIndex(float index) {
+    _frequencyUnit.exchange(RtSound::Frequency_Index);
+    _frequencyValue.exchange(index);
   }
 
+  inline float frequencyIndex() const {
+    return frequency(RtSound::Frequency_Index);
+  }
+
+  // Frequency Hertz
+  // ---------------------------------------------------------------------------
   inline void setFrequencyHertz(float hertz) {
-    _frequency_mHz.exchange(int(hertz * 1e+3f));
+    _frequencyUnit.exchange(RtSound::Frequency_mHertz);
+    _frequencyValue.exchange(int(RtSound::hertz_to_mHertz(hertz)));
   }
 
   inline float frequencyHertz() const {
-    return float(_frequency_mHz.load()) * 1e-3f;
+    return frequency(RtSound::Frequency_Hertz);
   }
 
-  static inline float percentTo_Hz(float fs, float fp) {
-    return fp * 5e-3f * fs;
+  // Frequency Normal
+  // ---------------------------------------------------------------------------
+  inline void setFrequencyNormal(float normal) {
+    using namespace RtSound;
+    assert(0.0f <= normal && normal <= 1.0f);
+    _frequencyUnit.exchange(Frequency_mNormal);
+    _frequencyValue.exchange(int(normal_to_mNormal(normal)));
   }
 
-  static inline float percentTo_mHz(float fs, float fp) {
-    return fp * 5e-3f * fs * 1e+3f;
+  inline float frequencyNormal() const {
+    return frequency(RtSound::Frequency_Normal);
+  }
+
+  // Frequency Percent
+  // ---------------------------------------------------------------------------
+  inline void setFrequencyPercent(float percent) {
+    assert(0.0f <= percent && percent <= 100.0f);
+    setFrequencyNormal(percent * 1e-2f);
+  }
+
+  inline float frequencyPercent() const { return frequencyNormal() * 1e+2f; }
+
+  // Frequency Converter
+  // ---------------------------------------------------------------------------
+  inline float frequency(RtSound::FrequencyUnit toUnit) const {
+    const auto fromUnit{RtSound::FrequencyUnit(_frequencyUnit.load())};
+    const auto value{float(_frequencyValue.load())};
+    const auto sampleRate{float(_sampleRate.load())};
+    const auto bufferSize{float(_bufferSize.load())};
+
+    return RtSound::convertFrequency(fromUnit, toUnit, value, sampleRate,
+                                     bufferSize);
   }
 
 private:
@@ -41,9 +82,9 @@ private:
   }
 
   void generate(float *buffer, int nFrames) override final {
-    const double f{frequencyHertz()};
-    const double A{amplitudeNormalized()};
-    const double dt{1.0f / float(_sampleRate.load())};
+    const float f{frequencyHertz()};
+    const float A{amplitudeNormal()};
+    const float dt{1.0f / float(_sampleRate.load())};
     for (int i = 0; i != nFrames; ++i) {
       buffer[i] = float(A * cos(2 * M_PI * f * _t));
       _t += dt;
@@ -51,7 +92,9 @@ private:
   }
 
   std::atomic_int _sampleRate{};
-  std::atomic_int _frequency_mHz{};
+  std::atomic_int _bufferSize{};
+  std::atomic_int _frequencyUnit{};
+  std::atomic_int _frequencyValue{};
 
   double _t{};
 };

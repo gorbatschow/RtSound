@@ -26,16 +26,25 @@ public:
   inline void setChannel(int value) { _channel.exchange(value); }
   inline int inputChannel() const { return _channel.load(); }
 
-  // Amplitude
+  // Amplitude Normal
   // --------------------------------------------------------------------------
-  inline void setAmplitudePercent(float percent) {
-    assert(0.0f <= percent && percent <= 100.0f);
-    _amplitude_mP.exchange(int(percent * 1e+3f));
+  inline void setAmplitudeNormal(float normal) {
+    assert(0.0f <= normal && normal <= 1.0f);
+    _amplitude_mNormal.exchange(int(normal * 1e+3f));
   }
-  inline float amplitudePercent() {
-    return float(_amplitude_mP.load()) * 1e-3f;
+
+  inline float amplitudeNormal() {
+    return float(_amplitude_mNormal.load()) * 1e-3f;
   }
-  inline float amplitudeNormalized() { return amplitudePercent() * 1e-2f; }
+
+  // Amplitude Percent
+  // --------------------------------------------------------------------------
+  inline void setAmplitudePercent(float value) {
+    assert(0.0f <= value && value <= 100.0f);
+    setAmplitudeNormal(value * 1e-2f);
+  }
+
+  inline float amplitudePercent() { return amplitudeNormal() * 1e+2f; }
 
 protected:
   virtual void streamDataReady(const RtSoundData &data) override {
@@ -57,5 +66,5 @@ private:
   std::atomic_bool _enabled{};
   std::atomic_bool _toInput{};
   std::atomic_int _channel{};
-  std::atomic_int _amplitude_mP{};
+  std::atomic_int _amplitude_mNormal{};
 };
