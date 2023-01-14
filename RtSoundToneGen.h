@@ -79,6 +79,7 @@ public:
 private:
   void applyStreamConfig(const RtSoundSetup &setup) override final {
     _sampleRate.exchange(setup.sampleRate());
+    _bufferSize.exchange(setup.bufferFrames());
   }
 
   void generate(float *buffer, int nFrames) override final {
