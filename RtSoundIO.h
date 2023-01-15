@@ -20,6 +20,8 @@ public:
     _streamProvider->addClient(client);
   }
 
+  inline void orderClients() { _streamProvider->orderClients(); }
+
   inline const RtSoundInfo &streamInfo() const { return _streamInfo; }
   inline RtSoundProvider &streamProvider() { return (*_streamProvider); }
   inline RtSoundSetup &streamSetup() {

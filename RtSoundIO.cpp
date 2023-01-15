@@ -10,6 +10,7 @@ void RtSoundIO::startSoundEngine(RtAudio::Api api) {
   _streamInfo.setRtAduio(_rta);
   _streamProvider->setRtAduio(_rta);
   _streamProvider->notifyUpdateSoundDevices();
+  _streamProvider->notifyConfigureStream();
   _streamProvider->notifyApplyStreamConfig();
 }
 
