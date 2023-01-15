@@ -9,10 +9,10 @@ void RtSoundIO::startSoundEngine(RtAudio::Api api) {
   _rta = std::make_shared<RtAudio>(api);
   _streamInfo.setRtAduio(_rta);
   _streamProvider->setRtAduio(_rta);
+  _streamProvider->orderClients();
   _streamProvider->notifyUpdateSoundDevices();
   _streamProvider->notifyConfigureStream();
   _streamProvider->notifyApplyStreamConfig();
-  _streamProvider->orderClients();
 }
 
 void RtSoundIO::startSoundStream(bool shot) {
