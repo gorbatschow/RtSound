@@ -15,6 +15,12 @@ void RtSoundIO::startSoundEngine(RtAudio::Api api) {
   _streamProvider->notifyApplyStreamConfig();
 }
 
+void RtSoundIO::setupSoundStream() {
+  _streamProvider->orderClients();
+  _streamProvider->notifyConfigureStream();
+  _streamProvider->notifyApplyStreamConfig();
+}
+
 void RtSoundIO::startSoundStream(bool shot) {
   if (!_rta) {
     startSoundEngine();

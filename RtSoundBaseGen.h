@@ -4,9 +4,13 @@
 
 class RtSoundBaseGen : public RtSoundClient {
 public:
+  // Constructor
   RtSoundBaseGen(int priority = 0) : RtSoundClient(priority) {}
+
+  // Destructor
   virtual ~RtSoundBaseGen() = default;
 
+  // Client Type Id
   virtual const std::type_info &clientTypeId() const override {
     return typeid(this);
   }
@@ -26,8 +30,23 @@ public:
   inline void setChannel(int value) { _channel.exchange(value); }
   inline int inputChannel() const { return _channel.load(); }
 
+  // Gate Enabled
+  // ---------------------------------------------------------------------------
+  inline void setGateEnabled(bool enabled) { _gateEnabled.exchange(enabled); };
+  inline bool gateEnabled() const { return _gateEnabled.load(); }
+
+  // Gate Open Frame
+  // ---------------------------------------------------------------------------
+  inline void setGateOpenFrame(int index) { _gateOpenFrame.exchange(index); }
+  inline int gateOpenFrame() const { return _gateOpenFrame.load(); }
+
+  // Gate Frame Count
+  // ---------------------------------------------------------------------------
+  inline void setGateFrameCount(int count) { _gateFrameCount.exchange(count); }
+  inline int gateFrameCount() const { return _gateFrameCount.load(); }
+
   // Amplitude Normal
-  // --------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
   inline void setAmplitudeNormal(float normal) {
     assert(0.0f <= normal && normal <= 1.0f);
     _amplitude_mNormal.exchange(int(normal * 1e+3f));
@@ -38,7 +57,7 @@ public:
   }
 
   // Amplitude Percent
-  // --------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
   inline void setAmplitudePercent(float value) {
     assert(0.0f <= value && value <= 100.0f);
     setAmplitudeNormal(value * 1e-2f);
@@ -47,17 +66,24 @@ public:
   inline float amplitudePercent() { return amplitudeNormal() * 1e+2f; }
 
 protected:
+  virtual void applyStreamConfig(const RtSoundSetup &config) override {}
+
   virtual void streamDataReady(const RtSoundData &data) override {
     if (!_enabled.load()) {
       return;
     }
-    if (_toInput.load()) {
-      std::lock_guard lock(data.mutex);
-      generate(data.inputBuffer(_channel), data.framesN());
-    } else {
-      std::lock_guard lock(data.mutex);
-      generate(data.outputBuffer(_channel), data.framesN());
+
+    int bias = 0;
+    int nFrames = data.framesN();
+    if (_gateEnabled.load()) {
+      bias = std::clamp(_gateOpenFrame.load(), 0, nFrames);
+      nFrames = std::clamp(_gateFrameCount.load(), 0, nFrames - bias);
     }
+
+    auto buffer{_toInput.load() ? data.inputBuffer(_channel.load(), bias)
+                                : data.outputBuffer(_channel.load(), bias)};
+
+    generate(buffer, nFrames);
   }
 
   virtual void generate(float *buffer, int nFrames) {}
@@ -66,5 +92,8 @@ private:
   std::atomic_bool _enabled{};
   std::atomic_bool _toInput{};
   std::atomic_int _channel{};
+  std::atomic_bool _gateEnabled{};
+  std::atomic_int _gateOpenFrame{};
+  std::atomic_int _gateFrameCount{};
   std::atomic_int _amplitude_mNormal{};
 };

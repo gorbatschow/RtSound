@@ -40,9 +40,9 @@ public:
   // Input
   // ---------------------------------------------------------------------------
   inline void setInputBuffer(float *input) { _input = input; }
-  inline float *inputBuffer(int channel = 0) const {
+  inline float *inputBuffer(int channel = 0, int bias = 0) const {
     assert(channel < _nInputs);
-    return _input + _nFrames * channel;
+    return _input + _nFrames * channel + bias;
   }
 
   inline void nullifyInputBuffer() const {
@@ -57,9 +57,9 @@ public:
   // Output
   // ---------------------------------------------------------------------------
   inline void setOutputBuffer(float *output) { _output = output; }
-  inline float *outputBuffer(int channel = 0) const {
+  inline float *outputBuffer(int channel = 0, int bias = 0) const {
     assert(channel < _nOutputs);
-    return _output + _nFrames * channel;
+    return _output + _nFrames * channel + bias;
   }
 
   inline void nullifyOutputBuffer() const {

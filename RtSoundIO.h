@@ -13,6 +13,7 @@ public:
   ~RtSoundIO() = default;
 
   void startSoundEngine(RtAudio::Api api = RtAudio::UNSPECIFIED);
+  void setupSoundStream();
   void startSoundStream(bool shot = false);
   void stopSoundStream();
 

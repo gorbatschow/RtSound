@@ -90,6 +90,7 @@ private:
       buffer[i] = float(A * cos(2 * M_PI * f * _t));
       _t += dt;
     }
+    _t = gateEnabled() ? 0.0f : _t;
   }
 
   std::atomic_int _sampleRate{};
