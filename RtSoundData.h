@@ -66,7 +66,10 @@ public:
 
   // Output
   // ---------------------------------------------------------------------------
-  inline void setOutputBuffer(float *output) { _output = output; }
+  inline void setOutputBuffer(float *output) {
+    _output = output;
+    nullifyOutputBuffer();
+  }
   inline float *outputBuffer(int channel = 0, int bias = 0) const {
     assert(channel < _nOutputs);
     return _output + _nFrames * channel + bias;
