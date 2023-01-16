@@ -73,15 +73,26 @@ protected:
       return;
     }
 
-    int bias = 0;
-    int nFrames = data.framesN();
-    if (_gateEnabled.load()) {
-      bias = std::clamp(_gateOpenFrame.load(), 0, nFrames);
-      nFrames = std::clamp(_gateFrameCount.load(), 0, nFrames - bias);
+    const auto toInput{_toInput.load()};
+    const auto channel{_channel.load()};
+
+    if (!data.hasChannel(toInput, channel)) {
+      return;
     }
 
-    auto buffer{_toInput.load() ? data.inputBuffer(_channel.load(), bias)
-                                : data.outputBuffer(_channel.load(), bias)};
+    const auto isGated{_gateEnabled.load()};
+    int bias = 0;
+    int nFrames = data.framesN();
+
+    if (isGated) {
+      const auto openFrame{_gateOpenFrame.load()};
+      const auto frameCount{_gateFrameCount.load()};
+      bias = std::clamp(openFrame, 0, nFrames);
+      nFrames = std::clamp(frameCount, 0, nFrames - bias);
+    }
+
+    auto buffer{toInput ? data.inputBuffer(channel, bias)
+                        : data.outputBuffer(channel, bias)};
 
     generate(buffer, nFrames);
   }

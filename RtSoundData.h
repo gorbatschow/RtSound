@@ -12,6 +12,10 @@ public:
   RtSoundData &operator=(const RtSoundData &) = delete;
   ~RtSoundData() = default;
 
+  // Mutex
+  mutable std::mutex mutex;
+
+  // Sound Setup
   inline void setSoundSetup(const RtSoundSetup &setup) {
     setFramesN(setup.bufferFrames());
     setInputsN(setup.inputEnabled() ? setup.inputStream().nChannels : 0);
@@ -19,23 +23,29 @@ public:
     setSampleRate(setup.sampleRate());
   }
 
+  // Frame Count
   inline void setFramesN(int nFrames) { _nFrames = nFrames; }
   inline int framesN() const { return _nFrames; }
   inline long framesT() const {
     return long(double(_nFrames) / double(_sampleRate) * 1e6);
   }
 
+  // Sample Rate
   inline void setSampleRate(int sampleRate) { _sampleRate = sampleRate; }
   inline int sampleRate() const { return _sampleRate; }
 
+  // Stream Time
   inline void setStreamTime(double streamTime) { _streamTime = streamTime; }
   inline double streamTime() const { return _streamTime; }
 
+  // Result
   inline int result() const { return _result; }
   inline void setResult(int result) { _result = result; }
 
-  // Mutex
-  mutable std::mutex mutex;
+  // Check Channel
+  bool hasChannel(bool isInput, int channel) const {
+    return isInput ? _nInputs > channel : _nOutputs > channel;
+  }
 
   // Input
   // ---------------------------------------------------------------------------
