@@ -3,12 +3,15 @@
 #include <algorithm>
 
 void RtSoundProvider::addClient(std::weak_ptr<RtSoundClient> client_) {
-  const auto client{client_.lock().get()};
-  assert(client != nullptr);
+  const auto client{client_.lock()};
+  assert(client);
   client->setStreamProvider(weak_from_this());
   client->setStreamSetup(_streamSetup);
   client->setStreamData(_streamData);
   _clients.push_back(client_);
+  if (client->priority() == 0) {
+    client->setPriority(_clients.size());
+  }
 }
 
 void RtSoundProvider::setSetupToData() {
