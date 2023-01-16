@@ -56,6 +56,8 @@ protected:
   virtual void applyStreamConfig(const RtSoundSetup &) {}
   virtual void streamDataReady(const RtSoundData &) {}
 
+  std::mutex clientMutex;
+
 private:
   inline void setStreamProvider(std::weak_ptr<RtSoundProvider> provider) {
     assert(provider.lock() != nullptr);

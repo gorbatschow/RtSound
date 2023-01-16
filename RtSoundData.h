@@ -13,7 +13,7 @@ public:
   ~RtSoundData() = default;
 
   // Mutex
-  mutable std::mutex mutex;
+  // mutable std::mutex mutex;
 
   // Sound Setup
   inline void setSoundSetup(const RtSoundSetup &setup) {
