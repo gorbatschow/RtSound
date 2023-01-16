@@ -96,7 +96,10 @@ protected:
 
     if (isGated) {
       const auto interval{_gateInterval.load()};
-      if (++_gateIntervalCounter != interval) {
+      if (interval == 0) {
+        return;
+      }
+      if (++_gateIntervalCounter < interval) {
         return;
       } else {
         _gateIntervalCounter.exchange(0);
