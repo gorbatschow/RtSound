@@ -32,8 +32,16 @@ public:
 
   // Gate Enabled
   // ---------------------------------------------------------------------------
-  inline void setGateEnabled(bool enabled) { _gateEnabled.exchange(enabled); };
+  inline void setGateEnabled(bool enabled) { _gateEnabled.exchange(enabled); }
   inline bool gateEnabled() const { return _gateEnabled.load(); }
+
+  // Gate Interval
+  // ---------------------------------------------------------------------------
+  inline void setGateInterval(int interval) {
+    _gateInterval.exchange(interval);
+    _gateIntervalCounter.exchange(0);
+  }
+  inline int gateInterval() const { return _gateInterval.load(); }
 
   // Gate Open Frame
   // ---------------------------------------------------------------------------
@@ -66,7 +74,9 @@ public:
   inline float amplitudePercent() { return amplitudeNormal() * 1e+2f; }
 
 protected:
-  virtual void applyStreamConfig(const RtSoundSetup &config) override {}
+  virtual void applyStreamConfig(const RtSoundSetup &config) override {
+    _gateIntervalCounter = 0;
+  }
 
   virtual void streamDataReady(const RtSoundData &data) override {
     if (!_enabled.load()) {
@@ -85,6 +95,12 @@ protected:
     int nFrames = data.framesN();
 
     if (isGated) {
+      const auto interval{_gateInterval.load()};
+      if (++_gateIntervalCounter != interval) {
+        return;
+      } else {
+        _gateIntervalCounter.exchange(0);
+      }
       const auto openFrame{_gateOpenFrame.load()};
       const auto frameCount{_gateFrameCount.load()};
       bias = std::clamp(openFrame, 0, nFrames);
@@ -104,7 +120,9 @@ private:
   std::atomic_bool _toInput{};
   std::atomic_int _channel{};
   std::atomic_bool _gateEnabled{};
+  std::atomic_int _gateInterval{};
   std::atomic_int _gateOpenFrame{};
   std::atomic_int _gateFrameCount{};
   std::atomic_int _amplitude_mNormal{};
+  std::atomic_int _gateIntervalCounter{};
 };
