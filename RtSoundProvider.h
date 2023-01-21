@@ -12,7 +12,7 @@ public:
   ~RtSoundProvider() = default;
 
   // Mutex
-  mutable std::mutex mutex;
+  mutable std::mutex providerMutex;
 
   inline void setRtAduio(std::weak_ptr<RtAudio> rta) {
     assert(rta.lock() != nullptr);
