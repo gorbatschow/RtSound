@@ -41,8 +41,10 @@ public:
   }
 
   // Sample Rate
-  inline void setSampleRate(int sampleRate) { _sampleRate = sampleRate; }
-  inline int sampleRate() const { return _sampleRate; }
+  inline void setSampleRate(unsigned int sampleRate) {
+    _sampleRate = sampleRate;
+  }
+  inline unsigned int sampleRate() const { return _sampleRate; }
 
   // Buffer Frames
   inline void setBufferFrames(int bufferFrames) {
@@ -170,7 +172,7 @@ public:
 
 private:
   std::weak_ptr<RtAudio> _rta;
-  int _sampleRate{48000};
+  unsigned int _sampleRate{48000};
   unsigned int _bufferFrames{1024};
   bool _inputEnabled{};
   bool _outputEnabled{};
