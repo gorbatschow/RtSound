@@ -19,8 +19,7 @@ void RtSoundProvider::setSetupToData() {
 }
 
 void RtSoundProvider::checkClients() {
-  std::remove_if(_clients.begin(), _clients.end(),
-                 [](const auto &ptr) { return ptr.expired(); });
+  std::erase_if(_clients, [](const auto &ptr) { return ptr.expired(); });
 }
 
 void RtSoundProvider::orderClients() {

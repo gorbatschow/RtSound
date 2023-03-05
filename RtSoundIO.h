@@ -20,7 +20,7 @@ public:
   inline void addClient(std::weak_ptr<RtSoundClient> client) {
     _streamProvider->addClient(client);
   }
-
+  inline void checkClients() { _streamProvider->checkClients(); }
   inline void orderClients() { _streamProvider->orderClients(); }
 
   inline const RtSoundInfo &streamInfo() const { return _streamInfo; }
