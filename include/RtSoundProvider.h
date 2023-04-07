@@ -1,5 +1,5 @@
 #pragma once
-#include "RtSoundData.h"
+#include "RtSoundStreamData.h"
 #include "RtSoundStreamSetup.h"
 #include <memory>
 #include <mutex>
@@ -36,7 +36,7 @@ public:
     return (*ptr);
   }
 
-  inline Data &streamData() {
+  inline StreamData &streamData() {
     const auto ptr{_streamData.get()};
     assert(ptr != nullptr);
     return (*ptr);
@@ -51,7 +51,7 @@ public:
 private:
   std::vector<std::weak_ptr<Client> > _clients;
   std::shared_ptr<StreamSetup> _streamSetup{new StreamSetup()};
-  std::shared_ptr<Data> _streamData{new Data()};
+  std::shared_ptr<StreamData> _streamData{new StreamData()};
   long _streamDataReadyTime{};
 };
 } // namespace RtSound

@@ -6,13 +6,13 @@
 #include <shared_mutex>
 
 namespace RtSound {
-class Data
+class StreamData
 {
 public:
-  Data() = default;
-  Data(const Data &) = delete;
-  Data &operator=(const Data &) = delete;
-  ~Data() = default;
+  StreamData() = default;
+  StreamData(const StreamData &) = delete;
+  StreamData &operator=(const StreamData &) = delete;
+  ~StreamData() = default;
 
   // Mutex
   // mutable std::mutex mutex;

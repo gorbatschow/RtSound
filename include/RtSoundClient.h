@@ -1,5 +1,5 @@
 #pragma once
-#include "RtSoundData.h"
+#include "RtSoundStreamData.h"
 #include "RtSoundStreamSetup.h"
 #include <cassert>
 #include <memory>
@@ -46,7 +46,7 @@ public:
   }
   inline bool hasStreamSetup() const { return _streamSetup.lock() != nullptr; }
 
-  const Data &streamData() const {
+  const StreamData &streamData() const {
     const auto ptr{_streamData.lock()};
     assert(ptr != nullptr);
     return (*ptr);
@@ -58,7 +58,7 @@ protected:
   virtual void updateSoundDevices(const std::vector<RtAudio::DeviceInfo> &) {}
   virtual void configureStream(StreamSetup &) {}
   virtual void applyStreamConfig(const StreamSetup &) {}
-  virtual void streamDataReady(const Data &) {}
+  virtual void streamDataReady(const StreamData &) {}
 
   std::mutex clientMutex;
 
@@ -73,7 +73,7 @@ private:
     _streamSetup.swap(setup);
   }
 
-  inline void setStreamData(std::weak_ptr<Data> data) {
+  inline void setStreamData(std::weak_ptr<StreamData> data) {
     assert(data.lock() != nullptr);
     _streamData.swap(data);
   }
@@ -84,7 +84,7 @@ private:
   std::string _clientName{"Sound Client"};
   std::weak_ptr<Provider> _streamProvider{};
   std::weak_ptr<StreamSetup> _streamSetup{};
-  std::weak_ptr<Data> _streamData{};
+  std::weak_ptr<StreamData> _streamData{};
   long _streamDataReadyTime{};
 };
 } // namespace RtSound
