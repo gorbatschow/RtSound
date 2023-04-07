@@ -3,7 +3,8 @@
 #include <random>
 #include <thread>
 
-void RtSoundIO::startSoundEngine(RtAudio::Api api) {
+namespace RtSound {
+void IO::startSoundEngine(RtAudio::Api api) {
   stopSoundStream();
 
   _rta = std::make_shared<RtAudio>(api);
@@ -15,7 +16,7 @@ void RtSoundIO::startSoundEngine(RtAudio::Api api) {
   _streamProvider->notifyApplyStreamConfig();
 }
 
-void RtSoundIO::setupSoundStream() {
+void IO::setupSoundStream() {
   const auto running{_rta->isStreamRunning()};
   stopSoundStream();
   _streamProvider->orderClients();
@@ -26,7 +27,7 @@ void RtSoundIO::setupSoundStream() {
   }
 }
 
-void RtSoundIO::startSoundStream(bool shot) {
+void IO::startSoundStream(bool shot) {
   if (!_rta) {
     startSoundEngine();
   }
@@ -48,10 +49,14 @@ void RtSoundIO::startSoundStream(bool shot) {
     return;
   }
 
-  const RtAudioErrorType rterr{_rta->openStream(
-      setup.outputStreamPtr(), setup.inputStreamPtr(), RTAUDIO_FLOAT32,
-      setup.sampleRate(), setup.bufferFramesPtr(), &RtSoundIO::onHandleStream,
-      this, &setup.streamOpts())};
+  const RtAudioErrorType rterr{_rta->openStream(setup.outputStreamPtr(),
+                                                setup.inputStreamPtr(),
+                                                RTAUDIO_FLOAT32,
+                                                setup.sampleRate(),
+                                                setup.bufferFramesPtr(),
+                                                &IO::onHandleStream,
+                                                this,
+                                                &setup.streamOpts())};
 
   if (rterr == RTAUDIO_NO_ERROR) {
     _streamProvider->notifyApplyStreamConfig();
@@ -59,7 +64,7 @@ void RtSoundIO::startSoundStream(bool shot) {
   }
 }
 
-void RtSoundIO::stopSoundStream() {
+void IO::stopSoundStream() {
   if (!_rta) {
     return;
   }
@@ -73,11 +78,13 @@ void RtSoundIO::stopSoundStream() {
   }
 }
 
-int RtSoundIO::onHandleStream(void *outputBuffer, void *inputBuffer,
-                              unsigned int nFrames, double streamTime,
-                              RtAudioStreamStatus streamStatus, void *ioPtr) {
-
-  auto &io = *static_cast<RtSoundIO *>(ioPtr);
+int IO::onHandleStream(void *outputBuffer,
+                       void *inputBuffer,
+                       unsigned int nFrames,
+                       double streamTime,
+                       RtAudioStreamStatus streamStatus,
+                       void *ioPtr) {
+  auto &io = *static_cast<IO *>(ioPtr);
   auto &data{io._streamProvider->streamData()};
   auto &setup{io.streamProvider().streamSetup()};
 
@@ -92,3 +99,4 @@ int RtSoundIO::onHandleStream(void *outputBuffer, void *inputBuffer,
 
   return data.result();
 }
+} // namespace RtSound

@@ -2,13 +2,16 @@
 #include "RtSoundClient.h"
 #include <atomic>
 
-class RtSoundBaseGen : public RtSoundClient {
+namespace RtSound {
+class BaseGen : public Client
+{
 public:
   // Constructor
-  RtSoundBaseGen(int priority = 0) : RtSoundClient(priority) {}
+  BaseGen(int priority = 0)
+      : Client(priority) {}
 
   // Destructor
-  virtual ~RtSoundBaseGen() = default;
+  virtual ~BaseGen() = default;
 
   // Client Type Id
   virtual const std::type_info &clientTypeId() const override {
@@ -74,11 +77,11 @@ public:
   inline float amplitudePercent() { return amplitudeNormal() * 1e+2f; }
 
 protected:
-  virtual void applyStreamConfig(const RtSoundSetup &config) override {
+  virtual void applyStreamConfig(const Setup &config) override {
     _gateIntervalCounter = 0;
   }
 
-  virtual void streamDataReady(const RtSoundData &data) override {
+  virtual void streamDataReady(const Data &data) override {
     if (!_enabled.load()) {
       return;
     }
@@ -129,3 +132,4 @@ private:
   std::atomic_int _amplitude_mNormal{};
   std::atomic_int _gateIntervalCounter{};
 };
+} // namespace RtSound

@@ -2,12 +2,15 @@
 #include "RtSoundBaseGen.h"
 #include <random>
 
-class RtSoundNoiseGen : public RtSoundBaseGen {
+namespace RtSound {
+class NoiseGen : public BaseGen
+{
 public:
-  RtSoundNoiseGen(int priority = 0) : RtSoundBaseGen(priority) {
+  NoiseGen(int priority = 0)
+      : BaseGen(priority) {
     setClientName("Noise Generator");
   }
-  ~RtSoundNoiseGen() override = default;
+  ~NoiseGen() override = default;
 
   virtual const std::type_info &clientTypeId() const override {
     return typeid(this);
@@ -26,3 +29,4 @@ private:
   std::random_device _rdev;
   std::mt19937 _rgen{_rdev()};
 };
+} // namespace RtSound

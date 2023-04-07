@@ -2,7 +2,8 @@
 #include "RtSoundClient.h"
 #include <algorithm>
 
-void RtSoundProvider::addClient(std::weak_ptr<RtSoundClient> client_) {
+namespace RtSound {
+void Provider::addClient(std::weak_ptr<Client> client_) {
   const auto client{client_.lock()};
   assert(client);
   client->setStreamProvider(weak_from_this());
@@ -14,41 +15,41 @@ void RtSoundProvider::addClient(std::weak_ptr<RtSoundClient> client_) {
   }
 }
 
-void RtSoundProvider::setSetupToData() {
+void Provider::setSetupToData() {
   _streamData->setSoundSetup(streamSetup());
 }
 
-void RtSoundProvider::checkClients() {
+void Provider::checkClients() {
   std::erase_if(_clients, [](const auto &ptr) { return ptr.expired(); });
 }
 
-void RtSoundProvider::orderClients() {
+void Provider::orderClients() {
   std::sort(_clients.begin(), _clients.end(),
             [](const auto &first, const auto &second) {
               return first.lock().get()->priority() < second.lock()->priority();
             });
 }
 
-void RtSoundProvider::notifyUpdateSoundDevices() {
+void Provider::notifyUpdateSoundDevices() {
   const auto devices{_streamSetup->listStreamDevices()};
   for (auto &client : _clients) {
     client.lock()->updateSoundDevices(devices);
   }
 }
 
-void RtSoundProvider::notifyConfigureStream() {
+void Provider::notifyConfigureStream() {
   for (auto &client : _clients) {
     client.lock()->configureStream(streamSetup());
   }
 }
 
-void RtSoundProvider::notifyApplyStreamConfig() {
+void Provider::notifyApplyStreamConfig() {
   for (auto &client : _clients) {
     client.lock()->applyStreamConfig(streamSetup());
   }
 }
 
-void RtSoundProvider::notifyStreamDataReady() {
+void Provider::notifyStreamDataReady() {
   for (auto &clientPtr : _clients) {
     const auto client{clientPtr.lock()};
     const auto beginTime{std::chrono::high_resolution_clock::now()};
@@ -60,3 +61,4 @@ void RtSoundProvider::notifyStreamDataReady() {
     client->setStreamDataReadyTime(duration);
   }
 }
+} // namespace RtSound

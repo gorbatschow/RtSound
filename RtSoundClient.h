@@ -3,16 +3,20 @@
 #include "RtSoundSetup.h"
 #include <cassert>
 #include <memory>
-class RtSoundProvider;
 
-class RtSoundClient {
-  friend class RtSoundProvider;
+namespace RtSound {
+class Provider;
+
+class Client
+{
+  friend class Provider;
 
 public:
-  RtSoundClient(int priority = 0) : _priority(priority) {}
-  RtSoundClient(const RtSoundClient &) = delete;
-  RtSoundClient &operator=(const RtSoundClient &) = delete;
-  virtual ~RtSoundClient() = default;
+  Client(int priority = 0)
+      : _priority(priority) {}
+  Client(const Client &) = delete;
+  Client &operator=(const Client &) = delete;
+  virtual ~Client() = default;
 
   inline void setPriority(int priority) { _priority = priority; }
   inline int priority() const { return _priority; };
@@ -26,7 +30,7 @@ public:
     return reinterpret_cast<std::uintptr_t>(this);
   }
 
-  const RtSoundProvider &streamProvider() const {
+  const Provider &streamProvider() const {
     const auto ptr{_streamProvider.lock()};
     assert(ptr != nullptr);
     return (*ptr);
@@ -35,14 +39,14 @@ public:
     return _streamProvider.lock() != nullptr;
   }
 
-  const RtSoundSetup &streamSetup() const {
+  const Setup &streamSetup() const {
     const auto ptr{_streamSetup.lock()};
     assert(ptr != nullptr);
     return (*ptr);
   }
   inline bool hasStreamSetup() const { return _streamSetup.lock() != nullptr; }
 
-  const RtSoundData &streamData() const {
+  const Data &streamData() const {
     const auto ptr{_streamData.lock()};
     assert(ptr != nullptr);
     return (*ptr);
@@ -52,24 +56,24 @@ public:
 
 protected:
   virtual void updateSoundDevices(const std::vector<RtAudio::DeviceInfo> &) {}
-  virtual void configureStream(RtSoundSetup &) {}
-  virtual void applyStreamConfig(const RtSoundSetup &) {}
-  virtual void streamDataReady(const RtSoundData &) {}
+  virtual void configureStream(Setup &) {}
+  virtual void applyStreamConfig(const Setup &) {}
+  virtual void streamDataReady(const Data &) {}
 
   std::mutex clientMutex;
 
 private:
-  inline void setStreamProvider(std::weak_ptr<RtSoundProvider> provider) {
+  inline void setStreamProvider(std::weak_ptr<Provider> provider) {
     assert(provider.lock() != nullptr);
     _streamProvider.swap(provider);
   }
 
-  inline void setStreamSetup(std::weak_ptr<RtSoundSetup> setup) {
+  inline void setStreamSetup(std::weak_ptr<Setup> setup) {
     assert(setup.lock() != nullptr);
     _streamSetup.swap(setup);
   }
 
-  inline void setStreamData(std::weak_ptr<RtSoundData> data) {
+  inline void setStreamData(std::weak_ptr<Data> data) {
     assert(data.lock() != nullptr);
     _streamData.swap(data);
   }
@@ -78,8 +82,9 @@ private:
 
   int _priority{};
   std::string _clientName{"Sound Client"};
-  std::weak_ptr<RtSoundProvider> _streamProvider{};
-  std::weak_ptr<RtSoundSetup> _streamSetup{};
-  std::weak_ptr<RtSoundData> _streamData{};
+  std::weak_ptr<Provider> _streamProvider{};
+  std::weak_ptr<Setup> _streamSetup{};
+  std::weak_ptr<Data> _streamData{};
   long _streamDataReadyTime{};
 };
+} // namespace RtSound

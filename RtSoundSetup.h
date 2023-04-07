@@ -3,10 +3,12 @@
 #include <cassert>
 #include <memory>
 
-class RtSoundSetup {
+namespace RtSound {
+class Setup
+{
 public:
-  RtSoundSetup() = default;
-  ~RtSoundSetup() = default;
+  Setup() = default;
+  ~Setup() = default;
 
   void setRtAduio(std::weak_ptr<RtAudio> rta) {
     assert(rta.lock() != nullptr);
@@ -180,3 +182,4 @@ private:
   RtAudio::StreamParameters _inputStream;
   RtAudio::StreamParameters _outputStream;
 };
+} // namespace RtSound

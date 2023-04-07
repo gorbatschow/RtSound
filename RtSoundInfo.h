@@ -4,12 +4,14 @@
 #include <cassert>
 #include <memory>
 
-class RtSoundInfo {
+namespace RtSound {
+class Info
+{
 public:
-  RtSoundInfo() = default;
-  RtSoundInfo(const RtSoundInfo &) = delete;
-  RtSoundInfo &operator=(const RtSoundInfo &) = delete;
-  ~RtSoundInfo() = default;
+  Info() = default;
+  Info(const Info &) = delete;
+  Info &operator=(const Info &) = delete;
+  ~Info() = default;
 
   inline void setRtAduio(std::weak_ptr<RtAudio> rta) {
     assert(rta.lock() != nullptr);
@@ -54,3 +56,4 @@ private:
   std::atomic_long _streamTime{};
   const double time_ms{1e3};
 };
+} // namespace RtSound

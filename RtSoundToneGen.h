@@ -4,16 +4,18 @@
 #include <atomic>
 #include <cmath>
 
-class RtSoundToneGen : public RtSoundBaseGen {
-
+namespace RtSound {
+class ToneGen : public BaseGen
+{
 public:
   // Constructor
-  RtSoundToneGen(int priority = 0) : RtSoundBaseGen(priority) {
+  ToneGen(int priority = 0)
+      : BaseGen(priority) {
     setClientName("Tone Generator");
   };
 
   // Destructor
-  ~RtSoundToneGen() override = default;
+  ~ToneGen() override = default;
 
   // Client Type Id
   virtual const std::type_info &clientTypeId() const override {
@@ -77,7 +79,7 @@ public:
   }
 
 private:
-  void applyStreamConfig(const RtSoundSetup &setup) override final {
+  void applyStreamConfig(const Setup &setup) override final {
     _sampleRate.exchange(setup.sampleRate());
     _bufferSize.exchange(setup.bufferFrames());
   }
@@ -100,3 +102,4 @@ private:
 
   double _t{};
 };
+} // namespace RtSound

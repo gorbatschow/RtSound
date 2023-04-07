@@ -5,18 +5,20 @@
 #include <cstring>
 #include <shared_mutex>
 
-class RtSoundData {
+namespace RtSound {
+class Data
+{
 public:
-  RtSoundData() = default;
-  RtSoundData(const RtSoundData &) = delete;
-  RtSoundData &operator=(const RtSoundData &) = delete;
-  ~RtSoundData() = default;
+  Data() = default;
+  Data(const Data &) = delete;
+  Data &operator=(const Data &) = delete;
+  ~Data() = default;
 
   // Mutex
   // mutable std::mutex mutex;
 
   // Sound Setup
-  inline void setSoundSetup(const RtSoundSetup &setup) {
+  inline void setSoundSetup(const Setup &setup) {
     setFramesN(setup.bufferFrames());
     setInputsN(setup.inputEnabled() ? setup.inputStream().nChannels : 0);
     setOutputsN(setup.outputEnabled() ? setup.outputStream().nChannels : 0);
@@ -96,3 +98,4 @@ private:
   double _streamTime{};
   int _result{};
 };
+} // namespace RtSound
