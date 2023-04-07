@@ -1,6 +1,6 @@
 #pragma once
 #include "RtSoundBaseGen.h"
-#include "RtSoundFrequency.h"
+#include "RtSoundFrequencyUnit.h"
 #include <atomic>
 #include <cmath>
 
