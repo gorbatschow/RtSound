@@ -8,9 +8,6 @@ set(CXX_CMAKE_STANDARD_REQUIRED ON)
 set(RTSOUNDIO_SOURCES
     RtSoundIO.cpp
     RtSoundProvider.cpp
-    RtSoundBaseGen.cpp
-    RtSoundToneGen.cpp
-    RtSoundNoiseGen.cpp
 )
 
 add_library(${PROJECT_NAME} ${RTSOUNDIO_SOURCES})
