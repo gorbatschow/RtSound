@@ -5,13 +5,13 @@
 #include <memory>
 
 namespace RtSound {
-class Info
+class StreamInfo
 {
 public:
-  Info() = default;
-  Info(const Info &) = delete;
-  Info &operator=(const Info &) = delete;
-  ~Info() = default;
+  StreamInfo() = default;
+  StreamInfo(const StreamInfo &) = delete;
+  StreamInfo &operator=(const StreamInfo &) = delete;
+  ~StreamInfo() = default;
 
   inline void setRtAduio(std::weak_ptr<RtAudio> rta) {
     assert(rta.lock() != nullptr);

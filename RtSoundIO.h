@@ -1,6 +1,6 @@
 #pragma once
-#include "RtSoundInfo.h"
 #include "RtSoundProvider.h"
+#include "RtSoundStreamInfo.h"
 #include <RtAudio.h>
 #include <algorithm>
 #include <atomic>
@@ -25,14 +25,14 @@ public:
   inline void checkClients() { _streamProvider->checkClients(); }
   inline void orderClients() { _streamProvider->orderClients(); }
 
-  inline const Info &streamInfo() const { return _streamInfo; }
+  inline const StreamInfo &streamInfo() const { return _streamInfo; }
   inline Provider &streamProvider() { return (*_streamProvider); }
   inline StreamSetup &streamSetup() { return (_streamProvider->streamSetup()); }
 
 private:
   std::shared_ptr<RtAudio> _rta;
   std::shared_ptr<Provider> _streamProvider{new Provider()};
-  Info _streamInfo;
+  StreamInfo _streamInfo;
 
   static int onHandleStream(void *outputBuffer, void *inputBuffer,
                             unsigned int nFrames, double streamTime,
