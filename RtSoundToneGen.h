@@ -79,7 +79,7 @@ public:
   }
 
 private:
-  void applyStreamConfig(const Setup &setup) override final {
+  void applyStreamConfig(const StreamSetup &setup) override final {
     _sampleRate.exchange(setup.sampleRate());
     _bufferSize.exchange(setup.bufferFrames());
   }

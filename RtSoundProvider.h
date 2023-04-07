@@ -1,6 +1,6 @@
 #pragma once
 #include "RtSoundData.h"
-#include "RtSoundSetup.h"
+#include "RtSoundStreamSetup.h"
 #include <memory>
 #include <mutex>
 #include <vector>
@@ -30,7 +30,7 @@ public:
   void notifyApplyStreamConfig();
   void notifyStreamDataReady();
 
-  inline Setup &streamSetup() {
+  inline StreamSetup &streamSetup() {
     const auto ptr{_streamSetup.get()};
     assert(ptr != nullptr);
     return (*ptr);
@@ -50,7 +50,7 @@ public:
 
 private:
   std::vector<std::weak_ptr<Client> > _clients;
-  std::shared_ptr<Setup> _streamSetup{new Setup()};
+  std::shared_ptr<StreamSetup> _streamSetup{new StreamSetup()};
   std::shared_ptr<Data> _streamData{new Data()};
   long _streamDataReadyTime{};
 };

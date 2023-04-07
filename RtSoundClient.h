@@ -1,6 +1,6 @@
 #pragma once
 #include "RtSoundData.h"
-#include "RtSoundSetup.h"
+#include "RtSoundStreamSetup.h"
 #include <cassert>
 #include <memory>
 
@@ -39,7 +39,7 @@ public:
     return _streamProvider.lock() != nullptr;
   }
 
-  const Setup &streamSetup() const {
+  const StreamSetup &streamSetup() const {
     const auto ptr{_streamSetup.lock()};
     assert(ptr != nullptr);
     return (*ptr);
@@ -56,8 +56,8 @@ public:
 
 protected:
   virtual void updateSoundDevices(const std::vector<RtAudio::DeviceInfo> &) {}
-  virtual void configureStream(Setup &) {}
-  virtual void applyStreamConfig(const Setup &) {}
+  virtual void configureStream(StreamSetup &) {}
+  virtual void applyStreamConfig(const StreamSetup &) {}
   virtual void streamDataReady(const Data &) {}
 
   std::mutex clientMutex;
@@ -68,7 +68,7 @@ private:
     _streamProvider.swap(provider);
   }
 
-  inline void setStreamSetup(std::weak_ptr<Setup> setup) {
+  inline void setStreamSetup(std::weak_ptr<StreamSetup> setup) {
     assert(setup.lock() != nullptr);
     _streamSetup.swap(setup);
   }
@@ -83,7 +83,7 @@ private:
   int _priority{};
   std::string _clientName{"Sound Client"};
   std::weak_ptr<Provider> _streamProvider{};
-  std::weak_ptr<Setup> _streamSetup{};
+  std::weak_ptr<StreamSetup> _streamSetup{};
   std::weak_ptr<Data> _streamData{};
   long _streamDataReadyTime{};
 };

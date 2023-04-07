@@ -77,7 +77,7 @@ public:
   inline float amplitudePercent() { return amplitudeNormal() * 1e+2f; }
 
 protected:
-  virtual void applyStreamConfig(const Setup &config) override {
+  virtual void applyStreamConfig(const StreamSetup &config) override {
     _gateIntervalCounter = 0;
   }
 

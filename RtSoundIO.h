@@ -27,7 +27,7 @@ public:
 
   inline const Info &streamInfo() const { return _streamInfo; }
   inline Provider &streamProvider() { return (*_streamProvider); }
-  inline Setup &streamSetup() { return (_streamProvider->streamSetup()); }
+  inline StreamSetup &streamSetup() { return (_streamProvider->streamSetup()); }
 
 private:
   std::shared_ptr<RtAudio> _rta;

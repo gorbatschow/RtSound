@@ -1,5 +1,5 @@
 #pragma once
-#include "RtSoundSetup.h"
+#include "RtSoundStreamSetup.h"
 #include <RtAudio.h>
 #include <cassert>
 #include <cstring>
@@ -18,7 +18,7 @@ public:
   // mutable std::mutex mutex;
 
   // Sound Setup
-  inline void setSoundSetup(const Setup &setup) {
+  inline void setSoundSetup(const StreamSetup &setup) {
     setFramesN(setup.bufferFrames());
     setInputsN(setup.inputEnabled() ? setup.inputStream().nChannels : 0);
     setOutputsN(setup.outputEnabled() ? setup.outputStream().nChannels : 0);

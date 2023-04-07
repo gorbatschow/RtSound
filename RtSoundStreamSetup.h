@@ -4,11 +4,11 @@
 #include <memory>
 
 namespace RtSound {
-class Setup
+class StreamSetup
 {
 public:
-  Setup() = default;
-  ~Setup() = default;
+  StreamSetup() = default;
+  ~StreamSetup() = default;
 
   void setRtAduio(std::weak_ptr<RtAudio> rta) {
     assert(rta.lock() != nullptr);
