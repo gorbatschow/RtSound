@@ -81,7 +81,7 @@ protected:
     _gateIntervalCounter = 0;
   }
 
-  virtual void streamDataReady(const Data &data) override {
+  virtual void streamDataReady(const StreamData &data) override {
     if (!_enabled.load()) {
       return;
     }
