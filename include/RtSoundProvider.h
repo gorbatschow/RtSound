@@ -1,5 +1,6 @@
 #pragma once
 #include "RtSoundStreamData.h"
+#include "RtSoundStreamInfo.h"
 #include "RtSoundStreamSetup.h"
 #include <memory>
 #include <mutex>
@@ -19,6 +20,7 @@ public:
   inline void setRtAduio(std::weak_ptr<RtAudio> rta) {
     assert(rta.lock() != nullptr);
     _streamSetup->setRtAduio(rta);
+    _streamInfo->setRtAduio(rta);
   }
 
   void addClient(std::weak_ptr<Client> client_);
@@ -42,6 +44,12 @@ public:
     return (*ptr);
   }
 
+  inline StreamInfo &streamInfo() {
+    const auto ptr{_streamInfo.get()};
+    assert(ptr != nullptr);
+    return (*ptr);
+  }
+
   inline long streamDataReadyTime() const { return _streamDataReadyTime; }
 
   inline const std::vector<std::weak_ptr<Client> > &clients() const {
@@ -52,6 +60,7 @@ private:
   std::vector<std::weak_ptr<Client> > _clients;
   std::shared_ptr<StreamSetup> _streamSetup{new StreamSetup()};
   std::shared_ptr<StreamData> _streamData{new StreamData()};
+  std::shared_ptr<StreamInfo> _streamInfo{new StreamInfo()};
   long _streamDataReadyTime{};
 };
 } // namespace RtSound

@@ -8,7 +8,6 @@ void IO::startSoundEngine(RtAudio::Api api) {
   stopSoundStream();
 
   _rta = std::make_shared<RtAudio>(api);
-  _streamInfo.setRtAduio(_rta);
   _streamProvider->setRtAduio(_rta);
   _streamProvider->orderClients();
   _streamProvider->notifyUpdateSoundDevices();
@@ -93,9 +92,9 @@ int IO::onHandleStream(void *outputBuffer,
   data.setFramesN(int(nFrames));
   data.setStreamTime(streamTime);
 
+  io._streamProvider->streamInfo().setStreamStatus(streamStatus);
+  io._streamProvider->streamInfo().setStreamTime(streamTime);
   io._streamProvider->notifyStreamDataReady();
-  io._streamInfo.setStreamStatus(streamStatus);
-  io._streamInfo.setStreamTime(streamTime);
 
   return data.result();
 }

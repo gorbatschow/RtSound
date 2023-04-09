@@ -9,6 +9,7 @@ void Provider::addClient(std::weak_ptr<Client> client_) {
   client->setStreamProvider(weak_from_this());
   client->setStreamSetup(_streamSetup);
   client->setStreamData(_streamData);
+  client->setStreamInfo(_streamInfo);
   _clients.push_back(client_);
   if (client->priority() == 0) {
     client->setPriority(_clients.size());
