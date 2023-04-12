@@ -8,13 +8,11 @@
 namespace RtSound {
 class Provider;
 
-class Client
-{
+class Client : public std::enable_shared_from_this<Client> {
   friend class Provider;
 
 public:
-  Client(int priority = 0)
-      : _priority(priority) {}
+  Client(int priority = 0) : _priority(priority) {}
   Client(const Client &) = delete;
   Client &operator=(const Client &) = delete;
   virtual ~Client() = default;
