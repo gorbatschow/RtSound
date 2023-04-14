@@ -8,8 +8,7 @@
 
 namespace RtSound {
 class Client;
-class Provider : public std::enable_shared_from_this<Provider>
-{
+class Provider : public std::enable_shared_from_this<Provider> {
 public:
   Provider() = default;
   ~Provider() = default;
@@ -23,10 +22,12 @@ public:
     _streamInfo->setRtAduio(rta);
   }
 
-  void addClient(std::weak_ptr<Client> client_);
+  void addClient(std::weak_ptr<Client> client);
   void setSetupToData();
   void checkClients();
   void orderClients();
+
+  void notifyApplyStreamProvider(Client &client);
   void notifyUpdateSoundDevices();
   void notifyConfigureStream();
   void notifyApplyStreamConfig();
@@ -52,12 +53,12 @@ public:
 
   inline long streamDataReadyTime() const { return _streamDataReadyTime; }
 
-  inline const std::vector<std::weak_ptr<Client> > &clients() const {
+  inline const std::vector<std::weak_ptr<Client>> &clients() const {
     return _clients;
   }
 
 private:
-  std::vector<std::weak_ptr<Client> > _clients;
+  std::vector<std::weak_ptr<Client>> _clients;
   std::shared_ptr<StreamSetup> _streamSetup{new StreamSetup()};
   std::shared_ptr<StreamData> _streamData{new StreamData()};
   std::shared_ptr<StreamInfo> _streamInfo{new StreamInfo()};

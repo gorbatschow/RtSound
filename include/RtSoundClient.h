@@ -1,4 +1,5 @@
 #pragma once
+#include "RtSoundProvider.h"
 #include "RtSoundStreamData.h"
 #include "RtSoundStreamInfo.h"
 #include "RtSoundStreamSetup.h"
@@ -7,7 +8,6 @@
 
 namespace RtSound {
 class Provider;
-
 class Client : public std::enable_shared_from_this<Client> {
   friend class Provider;
 
@@ -64,6 +64,7 @@ public:
   }
 
 protected:
+  virtual void applyStreamProvider(Provider &) {}
   virtual void updateSoundDevices(const std::vector<RtAudio::DeviceInfo> &) {}
   virtual void configureStream(StreamSetup &) {}
   virtual void applyStreamConfig(const StreamSetup &) {}

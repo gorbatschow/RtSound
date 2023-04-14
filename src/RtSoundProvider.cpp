@@ -10,15 +10,14 @@ void Provider::addClient(std::weak_ptr<Client> client_) {
   client->setStreamSetup(_streamSetup);
   client->setStreamData(_streamData);
   client->setStreamInfo(_streamInfo);
-  _clients.push_back(client_);
+  _clients.push_back(client);
   if (client->priority() == 0) {
     client->setPriority(_clients.size());
   }
+  notifyApplyStreamProvider(*client);
 }
 
-void Provider::setSetupToData() {
-  _streamData->setSoundSetup(streamSetup());
-}
+void Provider::setSetupToData() { _streamData->setSoundSetup(streamSetup()); }
 
 void Provider::checkClients() {
   std::erase_if(_clients, [](const auto &ptr) { return ptr.expired(); });
@@ -29,6 +28,10 @@ void Provider::orderClients() {
             [](const auto &first, const auto &second) {
               return first.lock().get()->priority() < second.lock()->priority();
             });
+}
+
+void Provider::notifyApplyStreamProvider(Client &client) {
+  client.applyStreamProvider(*this);
 }
 
 void Provider::notifyUpdateSoundDevices() {

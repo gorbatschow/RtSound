@@ -8,8 +8,7 @@
 #include <vector>
 
 namespace RtSound {
-class IO
-{
+class IO {
 public:
   IO() = default;
   ~IO() = default;
@@ -33,7 +32,7 @@ public:
 
 private:
   std::shared_ptr<RtAudio> _rta;
-  std::shared_ptr<Provider> _streamProvider{new Provider()};
+  std::shared_ptr<Provider> _streamProvider{std::make_shared<Provider>()};
 
   static int onHandleStream(void *outputBuffer, void *inputBuffer,
                             unsigned int nFrames, double streamTime,
