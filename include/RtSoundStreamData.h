@@ -1,21 +1,15 @@
 #pragma once
 #include "RtSoundStreamSetup.h"
-#include <RtAudio.h>
 #include <cassert>
 #include <cstring>
-#include <shared_mutex>
 
 namespace RtSound {
-class StreamData
-{
+class StreamData {
 public:
   StreamData() = default;
   StreamData(const StreamData &) = delete;
   StreamData &operator=(const StreamData &) = delete;
   ~StreamData() = default;
-
-  // Mutex
-  // mutable std::mutex mutex;
 
   // Sound Setup
   inline void setSoundSetup(const StreamSetup &setup) {

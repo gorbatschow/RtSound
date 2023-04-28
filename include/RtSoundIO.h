@@ -1,38 +1,33 @@
 #pragma once
-#include "RtSoundProvider.h"
-#include "RtSoundStreamInfo.h"
 #include <RtAudio.h>
-#include <algorithm>
-#include <atomic>
 #include <memory>
-#include <vector>
 
 namespace RtSound {
+class Provider;
+class Client;
+class StreamSetup;
+class StreamData;
+class StreamInfo;
+
 class IO {
 public:
-  IO() = default;
-  ~IO() = default;
+  IO();
+  ~IO();
 
-  void startSoundEngine(RtAudio::Api api = RtAudio::UNSPECIFIED);
+  void startSoundEngine(RtAudio::Api api);
   void setupSoundStream();
   void startSoundStream(bool shot = false);
   void stopSoundStream();
 
-  inline void addClient(std::weak_ptr<Client> client) {
-    _streamProvider->addClient(client);
-  }
-  inline void checkClients() { _streamProvider->checkClients(); }
-  inline void orderClients() { _streamProvider->orderClients(); }
-
-  inline Provider &streamProvider() { return (*_streamProvider); }
-  inline StreamSetup &streamSetup() { return (_streamProvider->streamSetup()); }
-  inline const StreamInfo &streamInfo() const {
-    return _streamProvider->streamInfo();
-  }
+  void addClient(std::weak_ptr<Client> client);
 
 private:
   std::shared_ptr<RtAudio> _rta;
-  std::shared_ptr<Provider> _streamProvider{std::make_shared<Provider>()};
+  std::shared_ptr<Provider> _streamProvider;
+  std::unique_ptr<StreamSetup> _streamSetup;
+  std::unique_ptr<StreamData> _streamData;
+  std::shared_ptr<StreamInfo> _streamInfo;
+  std::vector<std::weak_ptr<Client>> _clients;
 
   static int onHandleStream(void *outputBuffer, void *inputBuffer,
                             unsigned int nFrames, double streamTime,

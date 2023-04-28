@@ -1,67 +1,35 @@
 #pragma once
 #include "RtSoundStreamData.h"
-#include "RtSoundStreamInfo.h"
 #include "RtSoundStreamSetup.h"
+#include <RtAudio.h>
 #include <memory>
-#include <mutex>
 #include <vector>
 
 namespace RtSound {
 class Client;
-class Provider : public std::enable_shared_from_this<Provider> {
+class StreamInfo;
+
+class Provider {
 public:
-  Provider() = default;
-  ~Provider() = default;
+  Provider(const std::vector<std::weak_ptr<Client>> &list);
+  ~Provider();
 
-  // Mutex
-  mutable std::mutex providerMutex;
-
-  inline void setRtAduio(std::weak_ptr<RtAudio> rta) {
-    assert(rta.lock() != nullptr);
-    _streamSetup->setRtAduio(rta);
-    _streamInfo->setRtAduio(rta);
-  }
-
-  void addClient(std::weak_ptr<Client> client);
-  void setSetupToData();
   void checkClients();
   void orderClients();
 
-  void notifyApplyStreamProvider(Client &client);
-  void notifyUpdateSoundDevices();
-  void notifyConfigureStream();
-  void notifyApplyStreamConfig();
-  void notifyStreamDataReady();
-
-  inline StreamSetup &streamSetup() {
-    const auto ptr{_streamSetup.get()};
-    assert(ptr != nullptr);
-    return (*ptr);
-  }
-
-  inline StreamData &streamData() {
-    const auto ptr{_streamData.get()};
-    assert(ptr != nullptr);
-    return (*ptr);
-  }
-
-  inline StreamInfo &streamInfo() {
-    const auto ptr{_streamInfo.get()};
-    assert(ptr != nullptr);
-    return (*ptr);
-  }
+  void
+  notifyUpdateSoundClients(const std::vector<std::weak_ptr<Client>> &clients);
+  void notifyUpdateSoundDevices(const std::vector<RtAudio::DeviceInfo> &list);
+  void notifyConfigureStream(StreamSetup &setup);
+  void notifyApplyStreamConfig(const StreamSetup &setup);
+  void notifyStreamDataReady(const StreamData &data);
 
   inline long streamDataReadyTime() const { return _streamDataReadyTime; }
 
-  inline const std::vector<std::weak_ptr<Client>> &clients() const {
-    return _clients;
-  }
+  const std::vector<std::weak_ptr<Client>> &clients() const { return _clients; }
 
 private:
   std::vector<std::weak_ptr<Client>> _clients;
-  std::shared_ptr<StreamSetup> _streamSetup{new StreamSetup()};
-  std::shared_ptr<StreamData> _streamData{new StreamData()};
-  std::shared_ptr<StreamInfo> _streamInfo{new StreamInfo()};
   long _streamDataReadyTime{};
 };
 } // namespace RtSound

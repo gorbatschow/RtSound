@@ -5,18 +5,12 @@
 #include <memory>
 
 namespace RtSound {
-class StreamInfo
-{
+class StreamInfo {
 public:
-  StreamInfo() = default;
+  StreamInfo(std::shared_ptr<RtAudio> rta) : _rta{rta} {}
   StreamInfo(const StreamInfo &) = delete;
   StreamInfo &operator=(const StreamInfo &) = delete;
   ~StreamInfo() = default;
-
-  inline void setRtAduio(std::weak_ptr<RtAudio> rta) {
-    assert(rta.lock() != nullptr);
-    _rta.swap(rta);
-  }
 
   // Stream status
   inline void setStreamStatus(RtAudioStreamStatus streamStatus) {
@@ -35,23 +29,13 @@ public:
   }
 
   // Stream running
-  inline bool streamRunning() const {
-    const auto rta{_rta.lock().get()};
-    if (!rta)
-      return false;
-    return rta->isStreamRunning();
-  }
+  inline bool streamRunning() const { return _rta->isStreamRunning(); }
 
   // Stream open
-  inline bool streamOpen() const {
-    const auto rta{_rta.lock().get()};
-    if (!rta)
-      return false;
-    return rta->isStreamOpen();
-  }
+  inline bool streamOpen() const { return _rta->isStreamOpen(); }
 
 private:
-  std::weak_ptr<RtAudio> _rta;
+  std::shared_ptr<RtAudio> _rta;
   std::atomic<RtAudioStreamStatus> _streamStatus{};
   std::atomic_long _streamTime{};
   const double time_ms{1e3};

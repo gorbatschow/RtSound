@@ -4,18 +4,14 @@
 #include <memory>
 
 namespace RtSound {
-class StreamSetup
-{
-public:
-  StreamSetup() = default;
-  ~StreamSetup() = default;
 
-  void setRtAduio(std::weak_ptr<RtAudio> rta) {
-    assert(rta.lock() != nullptr);
-    _rta.swap(rta);
+class StreamSetup {
+public:
+  StreamSetup(std::shared_ptr<RtAudio> rta) : _rta{rta} {
     _inputStream.deviceId = _rta.lock()->getDefaultInputDevice();
     _outputStream.deviceId = _rta.lock()->getDefaultOutputDevice();
   }
+  ~StreamSetup() = default;
 
   // List Devices
   std::vector<RtAudio::DeviceInfo> listStreamDevices() const {

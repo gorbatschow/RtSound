@@ -1,11 +1,11 @@
 #pragma once
 #include <RtSoundBaseGen.h>
 #include <RtSoundClient.h>
-#include <RtSoundData.h>
 #include <RtSoundFrequencyUnit.h>
 #include <RtSoundIO.h>
 #include <RtSoundNoiseGen.h>
 #include <RtSoundProvider.h>
+#include <RtSoundStreamData.h>
 #include <RtSoundStreamInfo.h>
 #include <RtSoundStreamSetup.h>
 #include <RtSoundToneGen.h>
