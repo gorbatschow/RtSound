@@ -9,10 +9,7 @@ class ToneGen : public BaseGen
 {
 public:
   // Constructor
-  ToneGen(int priority = 0)
-      : BaseGen(priority) {
-    setClientName("Tone Generator");
-  };
+  ToneGen() { setClientName("Tone Generator"); };
 
   // Destructor
   ~ToneGen() override = default;

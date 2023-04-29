@@ -6,10 +6,7 @@ namespace RtSound {
 class NoiseGen : public BaseGen
 {
 public:
-  NoiseGen(int priority = 0)
-      : BaseGen(priority) {
-    setClientName("Noise Generator");
-  }
+  NoiseGen() { setClientName("Noise Generator"); }
   ~NoiseGen() override = default;
 
   virtual const std::type_info &clientTypeId() const override {

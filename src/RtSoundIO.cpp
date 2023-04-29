@@ -1,51 +1,42 @@
 #include "RtSoundIO.h"
 #include "RtSoundClient.h"
-#include "RtSoundProvider.h"
 #include <chrono>
+#include <functional>
 #include <random>
 #include <thread>
 
 namespace RtSound {
-IO::IO() {}
+
+IO::IO() {
+  initRta(RtAudio::UNSPECIFIED);
+}
 
 IO::~IO() = default;
 
 void IO::startSoundEngine(RtAudio::Api api) {
   stopSoundStream();
-
-  _rta = std::make_shared<RtAudio>(api);
-  _streamInfo = std::make_unique<StreamInfo>(_rta);
-  _streamSetup = std::make_unique<StreamSetup>(_rta);
-  _streamData = std::make_unique<StreamData>();
-
+  initRta(api);
+  notifyUpdateSoundDevices();
   setupSoundStream();
-  _streamProvider->notifyUpdateSoundDevices(_streamSetup->listStreamDevices());
 }
 
 void IO::setupSoundStream() {
   const auto running{_rta->isStreamRunning()};
-  stopSoundStream();
-  _streamProvider = std::make_unique<Provider>(_clients);
-  _streamProvider->notifyConfigureStream(*_streamSetup);
-  _streamProvider->notifyApplyStreamConfig(*_streamSetup);
-  _clients = _streamProvider->clients();
+  checkClients();
+  setupClients();
+  notifyUpdateSoundClients();
+  orderClients();
+  notifyConfigureStream();
+  notifyApplyStreamConfig();
   if (running) {
     startSoundStream();
   }
 }
 
 void IO::startSoundStream(bool shot) {
-  // TODO assert or exception...
-  if (!_rta) {
-    return;
-  }
-
   stopSoundStream();
 
   if (!_streamSetup->inputEnabled() && !_streamSetup->outputEnabled()) {
-    return;
-  }
-  if (_streamSetup->inputChannels() < 1 && _streamSetup->outputChannels() < 1) {
     return;
   }
 
@@ -58,11 +49,8 @@ void IO::startSoundStream(bool shot) {
       &_streamSetup->streamOpts())};
 
   if (rterr == RTAUDIO_NO_ERROR) {
-    _streamProvider = std::make_unique<Provider>(_clients);
-    _streamProvider->notifyConfigureStream(*_streamSetup);
-    _streamProvider->notifyApplyStreamConfig(*_streamSetup);
+    setupSoundStream();
     _streamData->setResult(shot ? 1 : 0);
-    _clients = _streamProvider->clients();
     _rta->startStream();
   }
 }
@@ -81,14 +69,74 @@ void IO::stopSoundStream() {
   }
 }
 
-void IO::addClient(std::weak_ptr<Client> client) {
-  client.lock()->_streamInfo = _streamInfo;
+void IO::addClient(std::shared_ptr<Client> client) {
+  assert(client.use_count() > 0);
+  setupClient(client);
   _clients.push_back(client);
 }
 
-int IO::onHandleStream(void *outputBuffer, void *inputBuffer,
-                       unsigned int nFrames, double streamTime,
-                       RtAudioStreamStatus streamStatus, void *ioPtr) {
+void IO::initRta(RtAudio::Api api) {
+  _rta = std::make_shared<RtAudio>(api);
+  _streamInfo = std::make_shared<StreamInfo>(_rta);
+  _streamSetup = std::make_shared<StreamSetup>(_rta);
+  _streamData = std::make_shared<StreamData>();
+}
+
+void IO::checkClients() {
+  std::erase_if(_clients, [](const auto &ptr) { return ptr.use_count() <= 1; });
+}
+
+void IO::setupClient(std::shared_ptr<Client> client) {
+  client->_streamInfo = _streamInfo;
+  client->_streamSetup = _streamSetup;
+  client->_streamData = _streamData;
+}
+
+void IO::setupClients() {
+  const auto func{[this](auto c) { setupClient(c); }};
+  std::for_each(std::cbegin(_clients), std::cend(_clients), func);
+}
+
+void IO::orderClients() {
+  const auto func{[](const auto &c1, const auto &c2) {
+    return c1->clientPriority() < c2->clientPriority();
+  }};
+  std::sort(std::begin(_clients), std::end(_clients), func);
+}
+
+void IO::notifyUpdateSoundClients() const {
+  const auto func{[this](const auto c) { c->updateSoundClients(_clients); }};
+  std::for_each(std::cbegin(_clients), std::cend(_clients), func);
+}
+
+void IO::notifyUpdateSoundDevices() const {
+  const auto func{[this](const auto c) {
+    c->updateSoundDevices(_streamSetup->listStreamDevices());
+  }};
+  std::for_each(std::cbegin(_clients), std::cend(_clients), func);
+}
+
+void IO::notifyConfigureStream() const {
+  const auto func{[this](const auto c) { c->configureStream(*_streamSetup); }};
+  std::for_each(std::cbegin(_clients), std::cend(_clients), func);
+}
+
+void IO::notifyApplyStreamConfig() const {
+  const auto func{[this](const auto c) { c->applyStreamConfig(*_streamSetup); }};
+  std::for_each(std::cbegin(_clients), std::cend(_clients), func);
+}
+
+void IO::notifyStreamDataReady() const {
+  const auto func{[this](const auto c) { c->streamDataReady(*_streamData); }};
+  std::for_each(std::cbegin(_clients), std::cend(_clients), func);
+}
+
+int IO::onHandleStream(void *outputBuffer,
+                       void *inputBuffer,
+                       unsigned int nFrames,
+                       double streamTime,
+                       RtAudioStreamStatus streamStatus,
+                       void *ioPtr) {
   auto &io = *static_cast<IO *>(ioPtr);
   auto &data{*io._streamData};
   auto &setup{*io._streamSetup};
@@ -102,7 +150,7 @@ int IO::onHandleStream(void *outputBuffer, void *inputBuffer,
   info.setStreamStatus(streamStatus);
   info.setStreamTime(streamTime);
 
-  io._streamProvider->notifyStreamDataReady(data);
+  io.notifyStreamDataReady();
 
   return data.result();
 }

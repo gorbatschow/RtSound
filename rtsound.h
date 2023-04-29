@@ -4,7 +4,6 @@
 #include <RtSoundFrequencyUnit.h>
 #include <RtSoundIO.h>
 #include <RtSoundNoiseGen.h>
-#include <RtSoundProvider.h>
 #include <RtSoundStreamData.h>
 #include <RtSoundStreamInfo.h>
 #include <RtSoundStreamSetup.h>

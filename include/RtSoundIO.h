@@ -19,15 +19,28 @@ public:
   void startSoundStream(bool shot = false);
   void stopSoundStream();
 
-  void addClient(std::weak_ptr<Client> client);
+  void addClient(std::shared_ptr<Client> client);
 
 private:
+  void initRta(RtAudio::Api api);
+  void checkClients();
+  void setupClient(std::shared_ptr<Client> client);
+  void setupClients();
+  void orderClients();
+
+  void notifyClientPriorityChanged() const;
+  void notifyUpdateSoundClients() const;
+  void notifyUpdateSoundDevices() const;
+  void notifyConfigureStream() const;
+  void notifyApplyStreamConfig() const;
+  void notifyStreamDataReady() const;
+
   std::shared_ptr<RtAudio> _rta;
   std::shared_ptr<Provider> _streamProvider;
-  std::unique_ptr<StreamSetup> _streamSetup;
-  std::unique_ptr<StreamData> _streamData;
+  std::shared_ptr<StreamSetup> _streamSetup;
+  std::shared_ptr<StreamData> _streamData;
   std::shared_ptr<StreamInfo> _streamInfo;
-  std::vector<std::weak_ptr<Client>> _clients;
+  std::vector<std::shared_ptr<Client> > _clients;
 
   static int onHandleStream(void *outputBuffer, void *inputBuffer,
                             unsigned int nFrames, double streamTime,

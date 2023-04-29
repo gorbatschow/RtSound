@@ -7,8 +7,7 @@ class BaseGen : public Client
 {
 public:
   // Constructor
-  BaseGen(int priority = 0)
-      : Client(priority) {}
+  BaseGen() = default;
 
   // Destructor
   virtual ~BaseGen() = default;
