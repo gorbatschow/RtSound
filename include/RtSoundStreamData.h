@@ -25,6 +25,7 @@ public:
   inline long framesT() const {
     return long(double(_nFrames) / double(_sampleRate) * 1e6);
   }
+  inline size_t framesBytes() const { return sizeof(float) * _nFrames; }
 
   // Sample Rate
   inline void setSampleRate(int sampleRate) { _sampleRate = sampleRate; }

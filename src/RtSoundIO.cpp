@@ -8,9 +8,15 @@
 
 namespace RtSound {
 
+struct IO::Sync
+{
+  std::mutex mutex;
+  std::condition_variable cv;
+  std::atomic_bool stopped{true};
+};
+
 struct IO::VirtualStreamArgs
 {
-  std::atomic_flag stop = ATOMIC_FLAG_INIT;
   std::future<void> future;
   std::vector<float> outputBuffer;
   std::vector<float> inputBuffer;
@@ -21,38 +27,30 @@ struct IO::VirtualStreamArgs
   void *ioPtr{};
 };
 
-IO::IO() {
+IO::IO()
+    : _sync{std::make_unique<IO::Sync>()} {
   initRta(RtAudio::UNSPECIFIED);
 }
 
 IO::~IO() = default;
 
 void IO::startSoundEngine(RtAudio::Api api) {
-  stopSoundStream();
   initRta(api);
   notifyUpdateSoundDevices();
   setupSoundStream();
 }
 
 void IO::setupSoundStream() {
-  const auto running{_rta->isStreamRunning()};
   stopSoundStream();
-
   checkClients();
   setupClients();
   orderClients();
   notifyUpdateSoundClients();
   notifyConfigureStream();
   notifyApplyStreamConfig();
-
-  if (running) {
-    startSoundStream();
-  }
 }
 
 void IO::startSoundStream(bool shot) {
-  stopSoundStream();
-
   if (!_streamSetup->inputEnabled() && !_streamSetup->outputEnabled()) {
     return;
   }
@@ -62,6 +60,8 @@ void IO::startSoundStream(bool shot) {
   _streamData->setSoundSetup(*_streamSetup);
   _streamData->setResult(shot ? 1 : 0);
 
+  _sync->stopped = false;
+
   if (!_streamSetup->streamVirtual()) {
     startSoundStreamRta();
   } else {
@@ -70,20 +70,18 @@ void IO::startSoundStream(bool shot) {
 }
 
 void IO::stopSoundStream() {
-  if (_virtualStreamArgs) {
-    _virtualStreamArgs->stop.test_and_set();
-  }
-
-  if (!_rta) {
+  if (_sync->stopped) {
     return;
   }
-
-  if (_rta->isStreamRunning()) {
-    _rta->stopStream();
-  }
-
-  if (_rta->isStreamOpen()) {
-    _rta->closeStream();
+  _sync->stopped = true;
+  std::lock_guard<std::mutex> lock{_sync->mutex};
+  if (_rta) {
+    if (_rta->isStreamRunning()) {
+      _rta->stopStream();
+    }
+    if (_rta->isStreamOpen()) {
+      _rta->closeStream();
+    }
   }
 }
 
@@ -144,8 +142,8 @@ void IO::startSoundStreamRta() {
 
 void IO::startSoundStreamVirtual() {
   _virtualStreamArgs = std::make_unique<VirtualStreamArgs>();
-  _virtualStreamArgs->inputBuffer.resize(_streamData->inputBufferSize(), {});
   _virtualStreamArgs->outputBuffer.resize(_streamData->outputBufferSize(), {});
+  _virtualStreamArgs->inputBuffer.resize(_streamData->inputBufferSize(), {});
   _virtualStreamArgs->nFrames = _streamData->framesN();
   _virtualStreamArgs->tFrames = _streamData->framesT();
   _virtualStreamArgs->ioPtr = this;
@@ -156,7 +154,11 @@ void IO::startSoundStreamVirtual() {
     using ms = std::chrono::milliseconds;
     using s = std::chrono::seconds;
 
-    while (!_virtualStreamArgs->stop.test()) {
+    for (;;) {
+      std::lock_guard<std::mutex> lock{_sync->mutex};
+      if (_sync->stopped) {
+        return;
+      }
       const auto tic{clock::now()};
       onHandleStream(_virtualStreamArgs->outputBuffer.data(),
                      _virtualStreamArgs->inputBuffer.data(),
@@ -165,6 +167,7 @@ void IO::startSoundStreamVirtual() {
                      _virtualStreamArgs->streamStatus,
                      _virtualStreamArgs->ioPtr);
       const auto toc{clock::now()};
+
       const auto t0{std::chrono::duration<double, std::micro>(toc - tic)};
       const auto t1{std::chrono::duration<double, std::micro>(
           _virtualStreamArgs->tFrames)};

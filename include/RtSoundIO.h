@@ -53,6 +53,9 @@ private:
                             double streamTime,
                             RtAudioStreamStatus status,
                             void *ioPtr);
+
+  struct Sync;
+  std::unique_ptr<Sync> _sync;
 };
 
 // -----------------------------------------------------------------------------
