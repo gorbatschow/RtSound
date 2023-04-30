@@ -40,8 +40,8 @@ void IO::setupSoundStream() {
 
   checkClients();
   setupClients();
-  notifyUpdateSoundClients();
   orderClients();
+  notifyUpdateSoundClients();
   notifyConfigureStream();
   notifyApplyStreamConfig();
 
@@ -144,8 +144,8 @@ void IO::startSoundStreamRta() {
 
 void IO::startSoundStreamVirtual() {
   _virtualStreamArgs = std::make_unique<VirtualStreamArgs>();
-  _virtualStreamArgs->inputBuffer.resize(_streamData->inputBufferSize());
-  _virtualStreamArgs->outputBuffer.resize(_streamData->outputBufferSize());
+  _virtualStreamArgs->inputBuffer.resize(_streamData->inputBufferSize(), {});
+  _virtualStreamArgs->outputBuffer.resize(_streamData->outputBufferSize(), {});
   _virtualStreamArgs->nFrames = _streamData->framesN();
   _virtualStreamArgs->tFrames = _streamData->framesT();
   _virtualStreamArgs->ioPtr = this;
