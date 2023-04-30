@@ -8,32 +8,28 @@ namespace RtSound {
 class StreamSetup {
 public:
   StreamSetup(std::shared_ptr<RtAudio> rta) : _rta{rta} {
-    _inputStream.deviceId = _rta.lock()->getDefaultInputDevice();
-    _outputStream.deviceId = _rta.lock()->getDefaultOutputDevice();
+    _inputStream.deviceId = _rta->getDefaultInputDevice();
+    _outputStream.deviceId = _rta->getDefaultOutputDevice();
   }
   ~StreamSetup() = default;
 
+  // Virtual Stream
+  inline void setStreamVirtual(bool v) { _streamIsVirtual = v; }
+  inline bool streamVirtual() const { return _streamIsVirtual; }
+
   // List Devices
   std::vector<RtAudio::DeviceInfo> listStreamDevices() const {
-    const auto rta{_rta.lock().get()};
-    if (!rta)
-      return {};
     std::vector<RtAudio::DeviceInfo> devices;
-    const auto ids{rta->getDeviceIds()};
+    const auto ids{_rta->getDeviceIds()};
     devices.reserve(ids.size());
     for (auto &id : ids) {
-      devices.push_back(rta->getDeviceInfo(id));
+      devices.push_back(_rta->getDeviceInfo(id));
     }
     return devices;
   }
 
   // Sound API
-  inline RtAudio::Api soundApi() {
-    const auto rta{_rta.lock().get()};
-    if (!rta)
-      return RtAudio::Api::UNSPECIFIED;
-    return rta->getCurrentApi();
-  }
+  inline RtAudio::Api soundApi() { return _rta->getCurrentApi(); }
   inline std::string soundApiName() {
     return RtAudio::getApiDisplayName(soundApi());
   }
@@ -95,10 +91,9 @@ public:
 
   // Input Device Name
   inline std::string inputDeviceName() const {
-    const auto rta{_rta.lock().get()};
-    if (!rta || !_inputEnabled)
+    if (!_inputEnabled)
       return {};
-    return rta->getDeviceInfo(_inputStream.deviceId).name;
+    return _rta->getDeviceInfo(_inputStream.deviceId).name;
   }
 
   // Input Channels Num
@@ -139,10 +134,9 @@ public:
 
   // Output Device Name
   inline std::string outputDeviceName() const {
-    const auto rta{_rta.lock().get()};
-    if (!rta || !_outputEnabled)
+    if (!_outputEnabled)
       return {};
-    return rta->getDeviceInfo(_outputStream.deviceId).name;
+    return _rta->getDeviceInfo(_outputStream.deviceId).name;
   }
 
   // Output Channels Num
@@ -169,7 +163,8 @@ public:
   }
 
 private:
-  std::weak_ptr<RtAudio> _rta;
+  std::shared_ptr<RtAudio> _rta;
+  bool _streamIsVirtual{};
   unsigned int _sampleRate{48000};
   unsigned int _bufferFrames{1024};
   bool _inputEnabled{};

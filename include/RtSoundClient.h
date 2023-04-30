@@ -3,6 +3,7 @@
 #include "RtSoundStreamInfo.h"
 #include "RtSoundStreamSetup.h"
 #include <cassert>
+#include <chrono>
 #include <memory>
 
 namespace RtSound {
@@ -11,7 +12,6 @@ class StreamInfo;
 
 class Client {
   friend class IO;
-  friend class Provider;
 
 public:
   Client() = default;
@@ -41,13 +41,6 @@ public:
   inline long streamDataReadyTime() const { return _streamDataReadyTime; }
 
 protected:
-  virtual void priorityChanged(int p) {}
-  virtual void updateSoundClients(
-      const std::vector<std::shared_ptr<Client> > &){};
-  virtual void updateSoundDevices(const std::vector<RtAudio::DeviceInfo> &) {}
-  virtual void configureStream(StreamSetup &) {}
-  virtual void applyStreamConfig(const StreamSetup &) {}
-  virtual void streamDataReady(const StreamData &) {}
 
   mutable std::mutex clientMutex;
 
@@ -58,5 +51,24 @@ private:
   std::shared_ptr<StreamInfo> _streamInfo;
   std::shared_ptr<StreamSetup> _streamSetup;
   std::shared_ptr<StreamData> _streamData;
+
+  virtual void priorityChanged(int) {}
+  virtual void updateSoundClients(
+      const std::vector<std::shared_ptr<Client> > &){};
+  virtual void updateSoundDevices(const std::vector<RtAudio::DeviceInfo> &) {}
+  virtual void configureStream(StreamSetup &) {}
+  virtual void applyStreamConfig(const StreamSetup &) {}
+  virtual void streamDataReady(const StreamData &) {}
+
+  void streamDataReadyMeasureTime(const StreamData &data) {
+    using clock = std::chrono::high_resolution_clock;
+    using us = std::chrono::microseconds;
+
+    const auto tic{clock::now()};
+    streamDataReady(data);
+    const auto toc{clock::now()};
+    const auto t{std::chrono::duration_cast<us>(toc - tic).count()};
+    _streamDataReadyTime = t;
+  }
 };
 } // namespace RtSound

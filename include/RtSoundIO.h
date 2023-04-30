@@ -28,6 +28,9 @@ private:
   void setupClients();
   void orderClients();
 
+  void startSoundStreamRta();
+  void startSoundStreamVirtual();
+
   void notifyClientPriorityChanged() const;
   void notifyUpdateSoundClients() const;
   void notifyUpdateSoundDevices() const;
@@ -36,15 +39,20 @@ private:
   void notifyStreamDataReady() const;
 
   std::shared_ptr<RtAudio> _rta;
-  std::shared_ptr<Provider> _streamProvider;
   std::shared_ptr<StreamSetup> _streamSetup;
   std::shared_ptr<StreamData> _streamData;
   std::shared_ptr<StreamInfo> _streamInfo;
   std::vector<std::shared_ptr<Client> > _clients;
 
-  static int onHandleStream(void *outputBuffer, void *inputBuffer,
-                            unsigned int nFrames, double streamTime,
-                            RtAudioStreamStatus status, void *ioPtr);
+  struct VirtualStreamArgs;
+  std::unique_ptr<VirtualStreamArgs> _virtualStreamArgs;
+
+  static int onHandleStream(void *outputBuffer,
+                            void *inputBuffer,
+                            unsigned int nFrames,
+                            double streamTime,
+                            RtAudioStreamStatus status,
+                            void *ioPtr);
 };
 
 // -----------------------------------------------------------------------------
