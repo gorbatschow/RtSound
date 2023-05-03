@@ -8,15 +8,13 @@
 
 namespace RtSound {
 
-struct IO::Sync
-{
+struct IO::Sync {
   std::mutex mutex;
   std::condition_variable cv;
   std::atomic_bool stopped{true};
 };
 
-struct IO::VirtualStreamArgs
-{
+struct IO::VirtualStreamArgs {
   std::future<void> future;
   std::vector<float> outputBuffer;
   std::vector<float> inputBuffer;
@@ -27,8 +25,7 @@ struct IO::VirtualStreamArgs
   void *ioPtr{};
 };
 
-IO::IO()
-    : _sync{std::make_unique<IO::Sync>()} {
+IO::IO() : _sync{std::make_unique<IO::Sync>()} {
   initRta(RtAudio::UNSPECIFIED);
 }
 
@@ -125,15 +122,11 @@ void IO::orderClients() {
 // -----------------------------------------------------------------------------
 
 void IO::startSoundStreamRta() {
-  [[maybe_unused]] RtAudioErrorType rterr{
-      _rta->openStream(_streamSetup->outputStreamPtr(),
-                       _streamSetup->inputStreamPtr(),
-                       RTAUDIO_FLOAT32,
-                       _streamSetup->sampleRate(),
-                       _streamSetup->bufferFramesPtr(),
-                       &IO::onHandleStream,
-                       this,
-                       &_streamSetup->streamOpts())};
+  [[maybe_unused]] RtAudioErrorType rterr{_rta->openStream(
+      _streamSetup->outputStreamPtr(), _streamSetup->inputStreamPtr(),
+      RTAUDIO_FLOAT32, _streamSetup->sampleRate(),
+      _streamSetup->bufferFramesPtr(), &IO::onHandleStream, this,
+      &_streamSetup->streamOpts())};
 
   if (rterr == RTAUDIO_NO_ERROR) {
     rterr = _rta->startStream();
@@ -160,21 +153,24 @@ void IO::startSoundStreamVirtual() {
         return;
       }
       const auto tic{clock::now()};
-      onHandleStream(_virtualStreamArgs->outputBuffer.data(),
-                     _virtualStreamArgs->inputBuffer.data(),
-                     _virtualStreamArgs->nFrames,
-                     _virtualStreamArgs->streamTime,
-                     _virtualStreamArgs->streamStatus,
-                     _virtualStreamArgs->ioPtr);
+      onHandleStream(
+          _virtualStreamArgs->outputBuffer.data(),
+          _virtualStreamArgs->inputBuffer.data(), _virtualStreamArgs->nFrames,
+          _virtualStreamArgs->streamTime, _virtualStreamArgs->streamStatus,
+          _virtualStreamArgs->ioPtr);
       const auto toc{clock::now()};
 
       const auto t0{std::chrono::duration<double, std::micro>(toc - tic)};
       const auto t1{std::chrono::duration<double, std::micro>(
           _virtualStreamArgs->tFrames)};
       const auto dt{(t1 - t0)};
-      _virtualStreamArgs->streamTime += std::chrono::duration<double>(dt).count();
       if (dt.count() > 0) {
         std::this_thread::sleep_for(dt);
+        _virtualStreamArgs->streamTime +=
+            double(_virtualStreamArgs->tFrames) * 1e-6;
+      } else {
+        _virtualStreamArgs->streamTime +=
+            double(std::chrono::duration<double>(dt).count()) * 1e-6;
       }
     }
   }};
@@ -202,7 +198,8 @@ void IO::notifyConfigureStream() const {
 }
 
 void IO::notifyApplyStreamConfig() const {
-  const auto func{[this](const auto c) { c->applyStreamConfig(*_streamSetup); }};
+  const auto func{
+      [this](const auto c) { c->applyStreamConfig(*_streamSetup); }};
   std::for_each(std::cbegin(_clients), std::cend(_clients), func);
 }
 
@@ -214,12 +211,9 @@ void IO::notifyStreamDataReady() const {
 
 // -----------------------------------------------------------------------------
 
-int IO::onHandleStream(void *outputBuffer,
-                       void *inputBuffer,
-                       unsigned int nFrames,
-                       double streamTime,
-                       RtAudioStreamStatus streamStatus,
-                       void *ioPtr) {
+int IO::onHandleStream(void *outputBuffer, void *inputBuffer,
+                       unsigned int nFrames, double streamTime,
+                       RtAudioStreamStatus streamStatus, void *ioPtr) {
   auto &io = *static_cast<IO *>(ioPtr);
   auto &data{*io._streamData};
   auto &setup{*io._streamSetup};
