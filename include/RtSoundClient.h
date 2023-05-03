@@ -40,8 +40,6 @@ public:
 
   inline long streamDataReadyTime() const { return _streamDataReadyTime; }
 
-protected:
-
   mutable std::mutex clientMutex;
 
 private:
@@ -53,8 +51,8 @@ private:
   std::shared_ptr<StreamData> _streamData;
 
   virtual void priorityChanged(int) {}
-  virtual void updateSoundClients(
-      const std::vector<std::shared_ptr<Client> > &){};
+  virtual void
+  updateSoundClients(const std::vector<std::shared_ptr<Client>> &){};
   virtual void updateSoundDevices(const std::vector<RtAudio::DeviceInfo> &) {}
   virtual void configureStream(StreamSetup &) {}
   virtual void applyStreamConfig(const StreamSetup &) {}
