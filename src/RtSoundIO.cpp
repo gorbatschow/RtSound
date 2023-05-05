@@ -138,7 +138,7 @@ void IO::startSoundStreamVirtual() {
   _virtualStreamArgs->outputBuffer.resize(_streamData->outputBufferSize(), {});
   _virtualStreamArgs->inputBuffer.resize(_streamData->inputBufferSize(), {});
   _virtualStreamArgs->nFrames = _streamData->framesN();
-  _virtualStreamArgs->tFrames = _streamData->framesT();
+  _virtualStreamArgs->tFrames = _streamData->framesT_us();
   _virtualStreamArgs->ioPtr = this;
 
   const auto timerEv{[this]() {
@@ -181,31 +181,31 @@ void IO::startSoundStreamVirtual() {
 // -----------------------------------------------------------------------------
 
 void IO::notifyUpdateSoundClients() const {
-  const auto func{[this](const auto c) { c->updateSoundClients(_clients); }};
+  const auto func{[this](const auto &c) { c->updateSoundClients(_clients); }};
   std::for_each(std::cbegin(_clients), std::cend(_clients), func);
 }
 
 void IO::notifyUpdateSoundDevices() const {
-  const auto func{[this](const auto c) {
+  const auto func{[this](const auto &c) {
     c->updateSoundDevices(_streamSetup->listStreamDevices());
   }};
   std::for_each(std::cbegin(_clients), std::cend(_clients), func);
 }
 
 void IO::notifyConfigureStream() const {
-  const auto func{[this](const auto c) { c->configureStream(*_streamSetup); }};
+  const auto func{[this](const auto &c) { c->configureStream(*_streamSetup); }};
   std::for_each(std::cbegin(_clients), std::cend(_clients), func);
 }
 
 void IO::notifyApplyStreamConfig() const {
   const auto func{
-      [this](const auto c) { c->applyStreamConfig(*_streamSetup); }};
+      [this](const auto &c) { c->applyStreamConfig(*_streamSetup); }};
   std::for_each(std::cbegin(_clients), std::cend(_clients), func);
 }
 
 void IO::notifyStreamDataReady() const {
   const auto func{
-      [this](const auto c) { c->streamDataReadyMeasureTime(*_streamData); }};
+      [this](const auto &c) { c->streamDataReadyMeasureTime(*_streamData); }};
   std::for_each(std::cbegin(_clients), std::cend(_clients), func);
 }
 

@@ -1,7 +1,5 @@
 #pragma once
 #include <RtAudio.h>
-#include <atomic>
-#include <cassert>
 #include <memory>
 
 namespace RtSound {
@@ -14,18 +12,16 @@ public:
 
   // Stream status
   inline void setStreamStatus(RtAudioStreamStatus streamStatus) {
-    _streamStatus.exchange(streamStatus);
+    _streamStatus = streamStatus;
   }
-  inline RtAudioStreamStatus streamStatus() const {
-    return _streamStatus.load();
-  }
+  inline RtAudioStreamStatus streamStatus() const { return _streamStatus; }
 
   // Stream time
   inline void setStreamTime(double streamTime) {
-    _streamTime.exchange(static_cast<unsigned long long>(streamTime * time_ms));
+    _streamTime = static_cast<unsigned long long>(streamTime * time_ms);
   }
   inline double streamTime() const {
-    return static_cast<double>(_streamTime.load()) / time_ms;
+    return static_cast<double>(_streamTime / time_ms);
   }
 
   // Stream running
@@ -36,8 +32,8 @@ public:
 
 private:
   std::shared_ptr<RtAudio> _rta;
-  std::atomic<RtAudioStreamStatus> _streamStatus{};
-  std::atomic_long _streamTime{};
+  RtAudioStreamStatus _streamStatus{};
+  unsigned long long _streamTime{};
   const double time_ms{1e3};
 };
 } // namespace RtSound

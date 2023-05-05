@@ -1,5 +1,6 @@
 #pragma once
 #include "RtSoundStreamSetup.h"
+#include <algorithm>
 #include <cassert>
 #include <cstring>
 
@@ -22,7 +23,10 @@ public:
   // Frame Count
   inline void setFramesN(int nFrames) { _nFrames = nFrames; }
   inline int framesN() const { return _nFrames; }
-  inline long framesT() const {
+  inline double framesT() const {
+    return double(_nFrames) / double(_sampleRate);
+  }
+  inline long framesT_us() const {
     return long(double(_nFrames) / double(_sampleRate) * 1e6);
   }
   inline size_t framesBytes() const { return sizeof(float) * _nFrames; }
@@ -54,6 +58,7 @@ public:
 
   inline void nullifyInputBuffer() const {
     memset(inputBuffer(), 0, inputBufferSize() * sizeof(float));
+    // std::fill(inputBuffer(), inputBuffer() + inputBufferSize(), 0.f);
   }
 
   inline int inputBufferSize() const { return _nInputs * _nFrames; }
