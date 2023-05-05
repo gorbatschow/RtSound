@@ -146,6 +146,7 @@ void IO::startSoundStreamVirtual() {
     using us = std::chrono::microseconds;
     using ms = std::chrono::milliseconds;
     using s = std::chrono::seconds;
+    using us_dur = std::chrono::duration<double, std::micro>;
 
     for (;;) {
       std::lock_guard<std::mutex> lock{_sync->mutex};
@@ -160,17 +161,16 @@ void IO::startSoundStreamVirtual() {
           _virtualStreamArgs->ioPtr);
       const auto toc{clock::now()};
 
-      const auto t0{std::chrono::duration<double, std::micro>(toc - tic)};
-      const auto t1{std::chrono::duration<double, std::micro>(
-          _virtualStreamArgs->tFrames)};
-      const auto dt{(t1 - t0)};
-      if (dt.count() > 0) {
-        std::this_thread::sleep_for(dt);
+      const auto t0{us_dur(toc - tic)};
+      const auto t1{us_dur(_virtualStreamArgs->tFrames)};
+      const auto ts{us_dur(t1 - t0)};
+      const double tsc{ts.count()};
+      if (ts.count() > 0) {
+        std::this_thread::sleep_for(ts);
         _virtualStreamArgs->streamTime +=
             double(_virtualStreamArgs->tFrames) * 1e-6;
       } else {
-        _virtualStreamArgs->streamTime +=
-            double(std::chrono::duration<double>(dt).count()) * 1e-6;
+        _virtualStreamArgs->streamTime += double(ts.count()) * 1e-6;
       }
     }
   }};
