@@ -8,14 +8,8 @@
 
 namespace RtSound {
 
-struct IO::Sync {
-  std::mutex mutex;
-  std::condition_variable cv;
-  std::atomic_bool stopped{true};
-};
-
 struct IO::VirtualStreamArgs {
-  std::future<void> future;
+  std::jthread worker;
   std::vector<float> outputBuffer;
   std::vector<float> inputBuffer;
   RtAudioStreamStatus streamStatus;
@@ -25,7 +19,7 @@ struct IO::VirtualStreamArgs {
   void *ioPtr{};
 };
 
-IO::IO() : _sync{std::make_unique<IO::Sync>()} {
+IO::IO() {
   initRta(RtAudio::UNSPECIFIED);
 }
 
@@ -57,8 +51,6 @@ void IO::startSoundStream(bool shot) {
   _streamData->setSoundSetup(*_streamSetup);
   _streamData->setResult(shot ? 1 : 0);
 
-  _sync->stopped = false;
-
   if (!_streamSetup->streamVirtual()) {
     startSoundStreamRta();
   } else {
@@ -67,19 +59,8 @@ void IO::startSoundStream(bool shot) {
 }
 
 void IO::stopSoundStream() {
-  if (_sync->stopped) {
-    return;
-  }
-  _sync->stopped = true;
-  std::scoped_lock<std::mutex> lock{_sync->mutex};
-  if (_rta) {
-    if (_rta->isStreamRunning()) {
-      _rta->abortStream();
-    }
-    if (_rta->isStreamOpen()) {
-      _rta->closeStream();
-    }
-  }
+  stopSoundStreamRta();
+  stopSoundStreamVirtual();
 }
 
 // -----------------------------------------------------------------------------
@@ -126,11 +107,17 @@ void IO::orderClients() {
 // -----------------------------------------------------------------------------
 
 void IO::startSoundStreamRta() {
-  [[maybe_unused]] RtAudioErrorType rterr{_rta->openStream(
-      _streamSetup->outputStreamPtr(), _streamSetup->inputStreamPtr(),
-      RTAUDIO_FLOAT32, _streamSetup->sampleRate(),
-      _streamSetup->bufferFramesPtr(), &IO::onHandleStream, this,
-      &_streamSetup->streamOpts())};
+  _virtualStreamArgs.reset();
+
+  [[maybe_unused]] RtAudioErrorType rterr{
+      _rta->openStream(_streamSetup->outputStreamPtr(),
+                       _streamSetup->inputStreamPtr(),
+                       RTAUDIO_FLOAT32,
+                       _streamSetup->sampleRate(),
+                       _streamSetup->bufferFramesPtr(),
+                       &IO::onHandleStream,
+                       this,
+                       &_streamSetup->streamOpts())};
 
   if (rterr == RTAUDIO_NO_ERROR) {
     rterr = _rta->startStream();
@@ -145,17 +132,13 @@ void IO::startSoundStreamVirtual() {
   _virtualStreamArgs->tFrames = _streamData->framesT_us();
   _virtualStreamArgs->ioPtr = this;
 
-  const auto timerEv{[this]() {
+  const auto timerEv{[this](std::stop_token stoken) {
     using clock = std::chrono::high_resolution_clock;
-    using us = std::chrono::microseconds;
-    using ms = std::chrono::milliseconds;
-    using s = std::chrono::seconds;
     using us_dur = std::chrono::duration<double, std::micro>;
 
     for (;;) {
-      std::scoped_lock<std::mutex> lock{_sync->mutex};
-      if (_sync->stopped) {
-        return;
+      if (stoken.stop_requested()) {
+        break;
       }
       const auto tic{clock::now()};
       onHandleStream(
@@ -169,17 +152,35 @@ void IO::startSoundStreamVirtual() {
       const auto t1{us_dur(_virtualStreamArgs->tFrames)};
       const auto ts{us_dur(t1 - t0)};
       const double tsc{ts.count()};
-      if (ts.count() > 0) {
+      if (tsc > 0) {
         std::this_thread::sleep_for(ts);
         _virtualStreamArgs->streamTime +=
             double(_virtualStreamArgs->tFrames) * 1e-6;
       } else {
-        _virtualStreamArgs->streamTime += double(ts.count()) * 1e-6;
+        _virtualStreamArgs->streamTime += double(tsc) * 1e-6;
       }
     }
   }};
 
-  _virtualStreamArgs->future = std::async(std::launch::async, timerEv);
+  _virtualStreamArgs->worker = std::jthread(timerEv);
+  _virtualStreamArgs->worker.detach();
+}
+
+void IO::stopSoundStreamRta() {
+  if (_rta) {
+    if (_rta->isStreamRunning()) {
+      _rta->abortStream();
+    }
+    if (_rta->isStreamOpen()) {
+      _rta->closeStream();
+    }
+  }
+}
+
+void IO::stopSoundStreamVirtual() {
+  if (_virtualStreamArgs) {
+    _virtualStreamArgs->worker.get_stop_source().request_stop();
+  }
 }
 
 // -----------------------------------------------------------------------------

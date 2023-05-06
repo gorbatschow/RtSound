@@ -31,6 +31,8 @@ private:
 
   void startSoundStreamRta();
   void startSoundStreamVirtual();
+  void stopSoundStreamRta();
+  void stopSoundStreamVirtual();
 
   void notifyClientPriorityChanged() const;
   void notifyUpdateSoundClients() const;
@@ -54,9 +56,6 @@ private:
                             double streamTime,
                             RtAudioStreamStatus status,
                             void *ioPtr);
-
-  struct Sync;
-  std::unique_ptr<Sync> _sync;
 };
 
 // -----------------------------------------------------------------------------
