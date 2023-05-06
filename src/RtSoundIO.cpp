@@ -71,7 +71,7 @@ void IO::stopSoundStream() {
     return;
   }
   _sync->stopped = true;
-  std::lock_guard<std::mutex> lock{_sync->mutex};
+  std::scoped_lock<std::mutex> lock{_sync->mutex};
   if (_rta) {
     if (_rta->isStreamRunning()) {
       _rta->stopStream();
@@ -149,7 +149,7 @@ void IO::startSoundStreamVirtual() {
     using us_dur = std::chrono::duration<double, std::micro>;
 
     for (;;) {
-      std::lock_guard<std::mutex> lock{_sync->mutex};
+      std::scoped_lock<std::mutex> lock{_sync->mutex};
       if (_sync->stopped) {
         return;
       }
