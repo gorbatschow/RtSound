@@ -19,12 +19,13 @@ public:
   void startSoundStream(bool shot = false);
   void stopSoundStream();
 
-  void addClient(std::shared_ptr<Client> client);
+  void addClient(const std::shared_ptr<Client> &client);
+  void removeClient(const std::shared_ptr<Client> &client);
 
 private:
   void initRta(RtAudio::Api api);
   void checkClients();
-  void setupClient(std::shared_ptr<Client> client);
+  void setupClient(const std::shared_ptr<Client> &client);
   void setupClients();
   void orderClients();
 

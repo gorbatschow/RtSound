@@ -74,7 +74,7 @@ void IO::stopSoundStream() {
   std::scoped_lock<std::mutex> lock{_sync->mutex};
   if (_rta) {
     if (_rta->isStreamRunning()) {
-      _rta->stopStream();
+      _rta->abortStream();
     }
     if (_rta->isStreamOpen()) {
       _rta->closeStream();
@@ -84,10 +84,14 @@ void IO::stopSoundStream() {
 
 // -----------------------------------------------------------------------------
 
-void IO::addClient(std::shared_ptr<Client> client) {
+void IO::addClient(const std::shared_ptr<Client> &client) {
   assert(client.use_count() > 0);
   setupClient(client);
   _clients.push_back(client);
+}
+
+void IO::removeClient(const std::shared_ptr<Client> &client) {
+  std::erase_if(_clients, [&client](const auto &ptr) { return ptr == client; });
 }
 
 void IO::initRta(RtAudio::Api api) {
@@ -101,7 +105,7 @@ void IO::checkClients() {
   std::erase_if(_clients, [](const auto &ptr) { return ptr.use_count() <= 1; });
 }
 
-void IO::setupClient(std::shared_ptr<Client> client) {
+void IO::setupClient(const std::shared_ptr<Client> &client) {
   client->_streamInfo = _streamInfo;
   client->_streamSetup = _streamSetup;
   client->_streamData = _streamData;
