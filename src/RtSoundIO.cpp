@@ -154,8 +154,8 @@ void IO::startSoundStreamVirtual() {
       const double tsc{ts.count()};
       if (tsc > 0) {
         std::this_thread::sleep_for(ts);
-        _virtualStreamArgs->streamTime +=
-            double(_virtualStreamArgs->tFrames) * 1e-6;
+        _virtualStreamArgs->streamTime += double(_virtualStreamArgs->tFrames)
+                                          * 1e-6;
       } else {
         _virtualStreamArgs->streamTime += double(tsc) * 1e-6;
       }
@@ -216,9 +216,12 @@ void IO::notifyStreamDataReady() const {
 
 // -----------------------------------------------------------------------------
 
-int IO::onHandleStream(void *outputBuffer, void *inputBuffer,
-                       unsigned int nFrames, double streamTime,
-                       RtAudioStreamStatus streamStatus, void *ioPtr) {
+int IO::onHandleStream(void *outputBuffer,
+                       void *inputBuffer,
+                       unsigned int nFrames,
+                       double streamTime,
+                       RtAudioStreamStatus streamStatus,
+                       void *ioPtr) {
   auto &io = *static_cast<IO *>(ioPtr);
   auto &data{*io._streamData};
   auto &setup{*io._streamSetup};

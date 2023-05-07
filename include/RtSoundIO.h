@@ -22,6 +22,8 @@ public:
   void addClient(const std::shared_ptr<Client> &client);
   void removeClient(const std::shared_ptr<Client> &client);
 
+  mutable std::mutex ioMutex;
+
 private:
   void initRta(RtAudio::Api api);
   void checkClients();
